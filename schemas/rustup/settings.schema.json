@@ -1,0 +1,41 @@
+{
+	"$id": "https://schemas.lbrunner.net/rustup/settings.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": false,
+	"description": "rustup's internal state file (${RUSTUP_HOME}/settings.toml, usually ~/.rustup/settings.toml). Not an official public interface (rustup's own docs say to use the CLI instead of editing this by hand), but the shape is stable and taken directly from the `Settings` struct in https://github.com/rust-lang/rustup/blob/main/src/settings.rs.",
+	"properties": {
+		"auto_install": {
+			"enum": ["enable", "disable"]
+		},
+		"auto_self_update": {
+			"enum": ["enable", "disable", "check-only"]
+		},
+		"default_host_triple": {
+			"description": "Default host tuple, e.g. \"aarch64-apple-darwin\" (serialized as default_host_tuple in newer rustup, default_host_triple accepted as an alias)",
+			"type": "string"
+		},
+		"default_toolchain": {
+			"description": "Name of the default toolchain, e.g. \"stable-aarch64-apple-darwin\"",
+			"type": "string"
+		},
+		"overrides": {
+			"additionalProperties": { "type": "string" },
+			"description": "Absolute directory path to toolchain name, populated by `rustup override set`",
+			"type": "object"
+		},
+		"pgp_keys": {
+			"description": "Path or URL to additional PGP keys to trust",
+			"type": "string"
+		},
+		"profile": {
+			"enum": ["minimal", "default", "complete"]
+		},
+		"version": {
+			"description": "Settings file format version, currently always \"12\"",
+			"type": "string"
+		}
+	},
+	"required": ["version"],
+	"title": "rustup settings.toml",
+	"type": "object"
+}

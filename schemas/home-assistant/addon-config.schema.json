@@ -1,0 +1,131 @@
+{
+	"$defs": {
+		"schemaValue": {
+			"oneOf": [
+				{ "type": "string" },
+				{
+					"description": "A repeated group: single-element array containing the nested schema for each item",
+					"items": { "$ref": "#/$defs/schemaValue" },
+					"maxItems": 1,
+					"type": "array"
+				},
+				{
+					"additionalProperties": { "$ref": "#/$defs/schemaValue" },
+					"description": "A nested group of options",
+					"type": "object"
+				}
+			]
+		}
+	},
+	"$id": "https://schemas.lbrunner.net/home-assistant/addon-config.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "Configuration file for a Home Assistant Supervisor add-on. Based on https://developers.home-assistant.io/docs/add-ons/configuration/. The Supervisor validates this with its own voluptuous schema at runtime; this JSON Schema only covers editor-time authoring help and does not replace that validation.",
+	"properties": {
+		"advanced": { "type": "boolean" },
+		"apparmor": {
+			"oneOf": [{ "type": "boolean" }, { "type": "string" }]
+		},
+		"arch": {
+			"items": { "enum": ["armhf", "armv7", "aarch64", "amd64", "i386"] },
+			"minItems": 1,
+			"type": "array"
+		},
+		"audio": { "type": "boolean" },
+		"auth_api": { "type": "boolean" },
+		"backup": { "enum": ["hot", "cold"] },
+		"backup_exclude": { "items": { "type": "string" }, "type": "array" },
+		"backup_post": { "type": "string" },
+		"backup_pre": { "type": "string" },
+		"boot": { "enum": ["auto", "manual"] },
+		"breaking_versions": { "items": { "type": "string" }, "type": "array" },
+		"description": { "type": "string" },
+		"devices": { "items": { "type": "string" }, "type": "array" },
+		"devicetree": { "type": "boolean" },
+		"discovery": { "items": { "type": "string" }, "type": "array" },
+		"docker_api": { "type": "boolean" },
+		"environment": {
+			"additionalProperties": { "type": "string" },
+			"type": "object"
+		},
+		"full_access": { "type": "boolean" },
+		"gpio": { "type": "boolean" },
+		"hassio_api": { "type": "boolean" },
+		"hassio_role": {
+			"enum": ["default", "homeassistant", "backup", "manager", "admin"]
+		},
+		"homeassistant": { "type": "string" },
+		"homeassistant_api": { "type": "boolean" },
+		"host_dbus": { "type": "boolean" },
+		"host_ipc": { "type": "boolean" },
+		"host_network": { "type": "boolean" },
+		"host_pid": { "type": "boolean" },
+		"host_uts": { "type": "boolean" },
+		"image": { "type": "string" },
+		"ingress": { "type": "boolean" },
+		"ingress_entry": { "type": "string" },
+		"ingress_port": { "type": "integer" },
+		"ingress_stream": { "type": "boolean" },
+		"init": { "default": true, "type": "boolean" },
+		"journald": { "type": "boolean" },
+		"kernel_modules": { "type": "boolean" },
+		"legacy": { "type": "boolean" },
+		"machine": { "items": { "type": "string" }, "type": "array" },
+		"map": {
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"name": { "type": "string" },
+		"options": {
+			"additionalProperties": true,
+			"description": "Default values for the options defined in `schema`",
+			"type": "object"
+		},
+		"panel_admin": { "type": "boolean" },
+		"panel_icon": { "type": "string" },
+		"panel_title": { "type": "string" },
+		"ports": {
+			"additionalProperties": { "type": ["integer", "null"] },
+			"description": "Map of '<port>/<tcp|udp>' to host port (or null to expose without a fixed host port)",
+			"type": "object"
+		},
+		"ports_description": {
+			"additionalProperties": { "type": "string" },
+			"type": "object"
+		},
+		"privileged": {
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"realtime": { "type": "boolean" },
+		"schema": {
+			"additionalProperties": { "$ref": "#/$defs/schemaValue" },
+			"description": "Validation schema for `options`, using Home Assistant's mini-DSL (e.g. 'str', 'bool?', 'password', 'url', 'list(a|b|c)', 'int(0,100)') or nested groups/lists",
+			"type": "object"
+		},
+		"services": { "items": { "type": "string" }, "type": "array" },
+		"slug": { "pattern": "^[a-z0-9_-]+$", "type": "string" },
+		"stage": { "enum": ["stable", "experimental", "deprecated"] },
+		"startup": {
+			"enum": ["initialize", "system", "services", "application", "once"]
+		},
+		"stdin": { "type": "boolean" },
+		"timeout": { "type": "integer" },
+		"tmpfs": { "type": "boolean" },
+		"uart": { "type": "boolean" },
+		"udev": { "type": "boolean" },
+		"ulimits": {
+			"additionalProperties": true,
+			"type": "object"
+		},
+		"url": { "format": "uri", "type": "string" },
+		"usb": { "type": "boolean" },
+		"version": { "type": "string" },
+		"video": { "type": "boolean" },
+		"watchdog": { "type": "string" },
+		"webui": { "type": "string" }
+	},
+	"required": ["name", "version", "slug", "description", "arch"],
+	"title": "Home Assistant add-on config.yaml",
+	"type": "object"
+}

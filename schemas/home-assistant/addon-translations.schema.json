@@ -1,0 +1,35 @@
+{
+	"$defs": {
+		"configEntry": {
+			"additionalProperties": false,
+			"properties": {
+				"description": { "type": "string" },
+				"fields": {
+					"additionalProperties": { "$ref": "#/$defs/configEntry" },
+					"description": "Translations for the nested fields of a group/list option",
+					"type": "object"
+				},
+				"name": { "type": "string" }
+			},
+			"type": "object"
+		}
+	},
+	"$id": "https://schemas.lbrunner.net/home-assistant/addon-translations.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": false,
+	"description": "Per-language translation strings for a Home Assistant add-on's config.yaml options (translations/<lang>.yaml), documented at https://developers.home-assistant.io/docs/add-ons/translations",
+	"properties": {
+		"configuration": {
+			"additionalProperties": { "$ref": "#/$defs/configEntry" },
+			"description": "Translations for each top-level key in the add-on's `options`/`schema`",
+			"type": "object"
+		},
+		"network": {
+			"additionalProperties": { "type": "string" },
+			"description": "Human readable description for each entry in `ports`, keyed by '<port>/<tcp|udp>'",
+			"type": "object"
+		}
+	},
+	"title": "Home Assistant add-on translations file",
+	"type": "object"
+}

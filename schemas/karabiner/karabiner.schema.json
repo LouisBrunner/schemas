@@ -1,0 +1,150 @@
+{
+	"$defs": {
+		"manipulator": {
+			"additionalProperties": true,
+			"properties": {
+				"conditions": {
+					"items": {
+						"properties": {
+							"bundle_identifiers": {
+								"items": { "type": "string" },
+								"type": "array"
+							},
+							"file_paths": { "items": { "type": "string" }, "type": "array" },
+							"name": { "type": "string" },
+							"type": { "type": "string" },
+							"value": {}
+						},
+						"type": "object"
+					},
+					"type": "array"
+				},
+				"description": { "type": "string" },
+				"from": { "type": "object" },
+				"parameters": { "type": "object" },
+				"to": { "items": { "type": "object" }, "type": "array" },
+				"to_after_key_up": { "items": { "type": "object" }, "type": "array" },
+				"to_delayed_action": {
+					"properties": {
+						"to_if_canceled": {
+							"items": { "type": "object" },
+							"type": "array"
+						},
+						"to_if_invoked": { "items": { "type": "object" }, "type": "array" }
+					},
+					"type": "object"
+				},
+				"to_if_alone": { "items": { "type": "object" }, "type": "array" },
+				"to_if_held_down": { "items": { "type": "object" }, "type": "array" },
+				"type": { "const": "basic" }
+			},
+			"required": ["type", "from"],
+			"type": "object"
+		},
+		"profile": {
+			"additionalProperties": true,
+			"properties": {
+				"complex_modifications": {
+					"properties": {
+						"parameters": { "type": "object" },
+						"rules": {
+							"items": {
+								"properties": {
+									"description": { "type": "string" },
+									"manipulators": {
+										"items": { "$ref": "#/$defs/manipulator" },
+										"type": "array"
+									}
+								},
+								"required": ["description", "manipulators"],
+								"type": "object"
+							},
+							"type": "array"
+						}
+					},
+					"type": "object"
+				},
+				"devices": {
+					"items": {
+						"properties": {
+							"disable_built_in_keyboard_if_exists": { "type": "boolean" },
+							"fn_function_keys": { "type": "array" },
+							"identifiers": {
+								"properties": {
+									"is_keyboard": { "type": "boolean" },
+									"is_pointing_device": { "type": "boolean" },
+									"product_id": { "type": "integer" },
+									"vendor_id": { "type": "integer" }
+								},
+								"type": "object"
+							},
+							"ignore": { "type": "boolean" },
+							"manipulate_caps_lock_led": { "type": "boolean" },
+							"simple_modifications": { "type": "array" }
+						},
+						"type": "object"
+					},
+					"type": "array"
+				},
+				"fn_function_keys": {
+					"items": {
+						"properties": {
+							"from": { "type": "object" },
+							"to": { "items": { "type": "object" }, "type": "array" }
+						},
+						"type": "object"
+					},
+					"type": "array"
+				},
+				"name": { "type": "string" },
+				"parameters": {
+					"description": "Profile-level parameters, e.g. delay_milliseconds_before_open_device",
+					"type": "object"
+				},
+				"selected": { "type": "boolean" },
+				"simple_modifications": {
+					"items": {
+						"properties": {
+							"from": { "type": "object" },
+							"to": { "items": { "type": "object" }, "type": "array" }
+						},
+						"type": "object"
+					},
+					"type": "array"
+				},
+				"virtual_hid_keyboard": {
+					"properties": {
+						"country_code": { "type": "integer" },
+						"keyboard_type_v2": { "type": "string" },
+						"mouse_key_xy_scale": { "type": "number" }
+					},
+					"type": "object"
+				}
+			},
+			"required": ["name", "selected"],
+			"type": "object"
+		}
+	},
+	"$id": "https://schemas.lbrunner.net/karabiner/karabiner.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": false,
+	"description": "Root configuration file for Karabiner-Elements (~/.config/karabiner/karabiner.json). Based on https://karabiner-elements.pqrs.org/docs/json/. The 'from'/'to' event definitions inside manipulators have many interchangeable shapes (key_code, consumer_key_code, pointing_button, shell_command, ...); those are intentionally left permissive rather than exhaustively modeled.",
+	"properties": {
+		"global": {
+			"additionalProperties": true,
+			"properties": {
+				"check_for_updates_on_startup": { "type": "boolean" },
+				"show_in_menu_bar": { "type": "boolean" },
+				"show_profile_name_in_menu_bar": { "type": "boolean" },
+				"unsafe_ui": { "type": "boolean" }
+			},
+			"type": "object"
+		},
+		"profiles": {
+			"items": { "$ref": "#/$defs/profile" },
+			"type": "array"
+		}
+	},
+	"title": "Karabiner-Elements configuration (karabiner.json)",
+	"type": "object"
+}

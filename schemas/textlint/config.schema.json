@@ -1,0 +1,52 @@
+{
+	"$defs": {
+		"ruleValue": {
+			"description": "Enable/disable a rule/filter/plugin, optionally with its own options and/or a severity override",
+			"oneOf": [
+				{ "type": "boolean" },
+				{
+					"additionalProperties": true,
+					"properties": {
+						"severity": { "enum": ["info", "warning", "error", 0, 1, 2] }
+					},
+					"type": "object"
+				}
+			]
+		}
+	},
+	"$id": "https://schemas.lbrunner.net/textlint/config.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "Config file for textlint, the pluggable natural language linter. Based on https://textlint.org/docs/configuring.html. Rule/filter/plugin option shapes are defined by whichever rule package is installed, so their values are left permissive.",
+	"properties": {
+		"extends": {
+			"description": "Shareable config(s) to extend, e.g. \"textlint-rule-preset-japanese\"",
+			"oneOf": [
+				{ "type": "string" },
+				{ "items": { "type": "string" }, "type": "array" }
+			]
+		},
+		"filters": {
+			"additionalProperties": { "$ref": "#/$defs/ruleValue" },
+			"description": "Keyed by filter rule name, used to suppress errors matching a condition",
+			"type": "object"
+		},
+		"plugins": {
+			"description": "Plugin names to enable, either as a list or as a name-to-options map",
+			"oneOf": [
+				{ "items": { "type": "string" }, "type": "array" },
+				{
+					"additionalProperties": { "$ref": "#/$defs/ruleValue" },
+					"type": "object"
+				}
+			]
+		},
+		"rules": {
+			"additionalProperties": { "$ref": "#/$defs/ruleValue" },
+			"description": "Keyed by rule name (or \"plugin-name/rule-name\" for a plugin-provided rule)",
+			"type": "object"
+		}
+	},
+	"title": "textlint configuration (.textlintrc)",
+	"type": "object"
+}

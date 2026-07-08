@@ -1,0 +1,71 @@
+{
+	"$defs": {
+		"input": {
+			"oneOf": [
+				{
+					"additionalProperties": false,
+					"description": "A single input",
+					"properties": {
+						"default": {},
+						"description": { "type": "string" },
+						"name": { "type": "string" },
+						"selector": {
+							"additionalProperties": true,
+							"description": "A Home Assistant selector object (entity, device, target, number, text, boolean, ...), left permissive",
+							"type": "object"
+						}
+					},
+					"type": "object"
+				},
+				{
+					"additionalProperties": false,
+					"description": "A collapsible section grouping several inputs",
+					"properties": {
+						"collapsed": { "type": "boolean" },
+						"description": { "type": "string" },
+						"icon": { "type": "string" },
+						"input": {
+							"additionalProperties": { "$ref": "#/$defs/input" },
+							"type": "object"
+						},
+						"name": { "type": "string" }
+					},
+					"required": ["input"],
+					"type": "object"
+				}
+			]
+		}
+	},
+	"$id": "https://schemas.lbrunner.net/home-assistant/blueprint.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "Automation/script blueprint YAML file. Documented at https://www.home-assistant.io/docs/automation/using_blueprints/ and https://www.home-assistant.io/docs/blueprint/selectors/. Only the 'blueprint:' metadata block is modeled strictly; the rest of the document is the automation/script body, which is intentionally left permissive because its shape depends on the arbitrarily complex trigger/condition/action schemas.",
+	"properties": {
+		"blueprint": {
+			"additionalProperties": false,
+			"properties": {
+				"author": { "type": "string" },
+				"description": { "type": "string" },
+				"domain": { "enum": ["automation", "script", "template"] },
+				"homeassistant": {
+					"properties": {
+						"min_version": { "type": "string" }
+					},
+					"type": "object"
+				},
+				"input": {
+					"additionalProperties": { "$ref": "#/$defs/input" },
+					"description": "Keyed by input slug, referenced elsewhere in the blueprint as !input <slug>",
+					"type": "object"
+				},
+				"name": { "type": "string" },
+				"source_url": { "format": "uri", "type": "string" }
+			},
+			"required": ["name", "domain"],
+			"type": "object"
+		}
+	},
+	"required": ["blueprint"],
+	"title": "Home Assistant blueprint",
+	"type": "object"
+}

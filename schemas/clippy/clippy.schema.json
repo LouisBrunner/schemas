@@ -1,0 +1,107 @@
+{
+	"$defs": {
+		"disallowedEntry": {
+			"oneOf": [
+				{
+					"description": "Fully qualified path of the disallowed item",
+					"type": "string"
+				},
+				{
+					"properties": {
+						"path": { "type": "string" },
+						"reason": { "type": "string" },
+						"replacement": { "type": "string" }
+					},
+					"required": ["path"],
+					"type": "object"
+				}
+			]
+		}
+	},
+	"$id": "https://schemas.lbrunner.net/clippy/clippy.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "Configuration file for the Rust Clippy linter (clippy.toml / .clippy.toml). Field set is based on https://doc.rust-lang.org/clippy/lint_configuration.html; Clippy adds new options with every release, so unknown keys are still accepted.",
+	"properties": {
+		"accept-comment-above-attributes": { "type": "boolean" },
+		"accept-comment-above-statement": { "type": "boolean" },
+		"allow-dbg-in-tests": { "type": "boolean" },
+		"allow-expect-in-tests": { "type": "boolean" },
+		"allow-print-in-tests": { "type": "boolean" },
+		"allow-unwrap-in-tests": { "type": "boolean" },
+		"array-size-threshold": { "type": "integer" },
+		"avoid-breaking-exported-api": {
+			"description": "Suppress lints that would require changes to the crate's public API",
+			"type": "boolean"
+		},
+		"cognitive-complexity-threshold": { "type": "integer" },
+		"disallowed-macros": {
+			"description": "Macros that should not be used",
+			"items": { "$ref": "#/$defs/disallowedEntry" },
+			"type": "array"
+		},
+		"disallowed-methods": {
+			"description": "Methods that should not be used",
+			"items": { "$ref": "#/$defs/disallowedEntry" },
+			"type": "array"
+		},
+		"disallowed-names": {
+			"description": "Additional names disallowed for bindings, on top of Clippy's defaults",
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"disallowed-types": {
+			"description": "Types that should not be used",
+			"items": { "$ref": "#/$defs/disallowedEntry" },
+			"type": "array"
+		},
+		"doc-valid-idents": {
+			"description": "Additional identifiers allowed to appear without backticks in doc comments",
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"enum-variant-name-threshold": { "type": "integer" },
+		"enum-variant-size-threshold": { "type": "integer" },
+		"excessive-nesting-threshold": { "type": "integer" },
+		"future-size-threshold": { "type": "integer" },
+		"ignore-interior-mutability": {
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"large-error-threshold": { "type": "integer" },
+		"literal-representation-threshold": { "type": "integer" },
+		"max-fn-params-bools": { "type": "integer" },
+		"max-include-file-size": { "type": "integer" },
+		"max-struct-bools": { "type": "integer" },
+		"max-trait-bounds": { "type": "integer" },
+		"min-ident-chars-threshold": { "type": "integer" },
+		"msrv": {
+			"description": "Minimum Supported Rust Version, e.g. \"1.75\"",
+			"type": "string"
+		},
+		"pass-by-value-size-limit": { "type": "integer" },
+		"single-char-binding-names-threshold": { "type": "integer" },
+		"standard-macro-braces": {
+			"items": {
+				"properties": {
+					"brace": { "enum": ["(", "[", "{"], "type": "string" },
+					"name": { "type": "string" }
+				},
+				"required": ["name", "brace"],
+				"type": "object"
+			},
+			"type": "array"
+		},
+		"struct-field-name-threshold": { "type": "integer" },
+		"suppress-restriction-lint-in-const": { "type": "boolean" },
+		"too-many-arguments-threshold": { "type": "integer" },
+		"too-many-lines-threshold": { "type": "integer" },
+		"trivial-copy-size-limit": { "type": "integer" },
+		"type-complexity-threshold": { "type": "integer" },
+		"unnecessary-box-size": { "type": "integer" },
+		"vec-box-size-threshold": { "type": "integer" },
+		"verbose-bit-mask-threshold": { "type": "integer" }
+	},
+	"title": "Rust Clippy configuration",
+	"type": "object"
+}

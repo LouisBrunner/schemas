@@ -1,0 +1,25 @@
+{
+	"$id": "https://schemas.lbrunner.net/ollama/config.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "Per-user Ollama app config (~/.ollama/config.json). Best-effort schema: Ollama does not publish a formal spec for this file. The 'integrations' section backs `ollama launch <integration>`, documented at https://docs.ollama.com/integrations/*, and lets you set default models per third-party tool.",
+	"properties": {
+		"integrations": {
+			"additionalProperties": {
+				"additionalProperties": true,
+				"properties": {
+					"models": {
+						"description": "Model name(s) to use when launching this integration",
+						"items": { "type": "string" },
+						"type": "array"
+					}
+				},
+				"type": "object"
+			},
+			"description": "Keyed by integration name (known values include claude, claude-desktop, cline, codex, copilot, droid, hermes, kimi, opencode; new ones are added over time)",
+			"type": "object"
+		}
+	},
+	"title": "Ollama app config.json",
+	"type": "object"
+}

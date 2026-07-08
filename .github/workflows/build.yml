@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Upload Pages artifact
+        uses: LouisBrunner/.github/.github/actions/upload-pages@main
+        with:
+          path: schemas
+
+  deploy:
+    name: Deploy
+    needs: [build]
+    if: github.ref_name == 'main'
+    permissions:
+      pages: write
+      id-token: write
+    uses: LouisBrunner/.github/.github/workflows/deploy-pages.yml@main

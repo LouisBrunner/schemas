@@ -1,0 +1,14 @@
+{
+	"$id": "https://schemas.lbrunner.net/ollama/server.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "Local Ollama server config (~/.ollama/server.json). Best-effort schema: only 'disable_ollama_cloud' is officially documented (https://docs.ollama.com/faq), so unknown keys are still accepted.",
+	"properties": {
+		"disable_ollama_cloud": {
+			"description": "Disables Ollama Cloud features (cloud models, web search); can also be set via the OLLAMA_NO_CLOUD environment variable. Requires a server restart to take effect.",
+			"type": "boolean"
+		}
+	},
+	"title": "Ollama server.json",
+	"type": "object"
+}

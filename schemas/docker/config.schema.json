@@ -1,0 +1,81 @@
+{
+	"$id": "https://schemas.lbrunner.net/docker/config.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "Client configuration file for the Docker CLI. Based on https://docs.docker.com/reference/cli/docker/ (not to be confused with SchemaStore's dockerd.json, which covers the daemon config instead).",
+	"properties": {
+		"auths": {
+			"additionalProperties": {
+				"properties": {
+					"auth": { "type": "string" },
+					"email": { "type": "string" },
+					"identitytoken": { "type": "string" }
+				},
+				"type": "object"
+			},
+			"description": "Registry hostname to credentials (base64 'auth' string, empty when using an external credsStore/credHelper)",
+			"type": "object"
+		},
+		"cliPluginsExtraDirs": {
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"configFormat": { "type": "string" },
+		"credHelpers": {
+			"additionalProperties": { "type": "string" },
+			"description": "Per-registry override of the credential helper to use",
+			"type": "object"
+		},
+		"credsStore": {
+			"description": "Suffix of the docker-credential-<name> helper used as the default credential store for all registries",
+			"type": "string"
+		},
+		"currentContext": { "type": "string" },
+		"detachKeys": {
+			"description": "Key sequence used to detach from a running container, e.g. \"ctrl-e,e\"",
+			"type": "string"
+		},
+		"experimental": { "enum": ["enabled", "disabled"] },
+		"features": {
+			"additionalProperties": { "type": "string" },
+			"type": "object"
+		},
+		"HttpHeaders": {
+			"additionalProperties": { "type": "string" },
+			"type": "object"
+		},
+		"imagesFormat": { "type": "string" },
+		"networksFormat": { "type": "string" },
+		"nodesFormat": { "type": "string" },
+		"plugins": {
+			"additionalProperties": {
+				"additionalProperties": { "type": "string" },
+				"type": "object"
+			},
+			"type": "object"
+		},
+		"pluginsFormat": { "type": "string" },
+		"proxies": {
+			"additionalProperties": {
+				"properties": {
+					"ftpProxy": { "type": "string" },
+					"httpProxy": { "type": "string" },
+					"httpsProxy": { "type": "string" },
+					"noProxy": { "type": "string" }
+				},
+				"type": "object"
+			},
+			"type": "object"
+		},
+		"psFormat": { "type": "string" },
+		"secretFormat": { "type": "string" },
+		"serviceInspectFormat": { "type": "string" },
+		"servicesFormat": { "type": "string" },
+		"stackOrchestrator": { "enum": ["swarm", "kubernetes", "all"] },
+		"statsFormat": { "type": "string" },
+		"tasksFormat": { "type": "string" },
+		"volumesFormat": { "type": "string" }
+	},
+	"title": "Docker CLI configuration file (~/.docker/config.json)",
+	"type": "object"
+}

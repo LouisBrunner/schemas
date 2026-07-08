@@ -1,0 +1,94 @@
+{
+	"$id": "https://schemas.lbrunner.net/checkov/config.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "Config file for the Checkov IaC scanner (.checkov.yaml / .checkov.yml). Keys mirror the long-form CLI flags documented at https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html; Checkov has no official schema of its own (see bridgecrewio/checkov#6086), so this only covers the commonly used subset and accepts unknown keys.",
+	"properties": {
+		"baseline": { "type": "string" },
+		"branch": { "type": "string" },
+		"check": {
+			"description": "Only run these checks (by ID, BC ID, or severity); everything else is skipped",
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"compact": { "type": "boolean" },
+		"directory": {
+			"description": "IaC root directory to scan (mutually exclusive with `file`)",
+			"oneOf": [
+				{ "type": "string" },
+				{ "items": { "type": "string" }, "type": "array" }
+			]
+		},
+		"download-external-modules": { "type": "boolean" },
+		"evaluate-variables": { "type": "boolean" },
+		"external-checks-dir": {
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"file": {
+			"description": "Specific file(s) to scan (mutually exclusive with `directory`)",
+			"oneOf": [
+				{ "type": "string" },
+				{ "items": { "type": "string" }, "type": "array" }
+			]
+		},
+		"framework": {
+			"description": "Only run checks for these frameworks (e.g. terraform, dockerfile, kubernetes)",
+			"oneOf": [
+				{ "type": "string" },
+				{ "items": { "type": "string" }, "type": "array" }
+			]
+		},
+		"hard-fail-on": { "items": { "type": "string" }, "type": "array" },
+		"mask": {
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"output": {
+			"description": "Report output format(s)",
+			"items": {
+				"enum": [
+					"cli",
+					"csv",
+					"cyclonedx",
+					"cyclonedx_json",
+					"json",
+					"junitxml",
+					"github_failed_only",
+					"gitlab_sast",
+					"sarif",
+					"spdx"
+				]
+			},
+			"type": "array"
+		},
+		"output-file-path": { "type": "string" },
+		"quiet": { "type": "boolean" },
+		"repo-id": { "type": "string" },
+		"secrets-scan-file-type": {
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"skip-check": {
+			"description": "Skip these checks (by ID, BC ID, severity, or secret status)",
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"skip-framework": {
+			"oneOf": [
+				{ "type": "string" },
+				{ "items": { "type": "string" }, "type": "array" }
+			]
+		},
+		"skip-path": {
+			"description": "Paths to skip, evaluated as regular expressions",
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"soft-fail": { "type": "boolean" },
+		"soft-fail-on": { "items": { "type": "string" }, "type": "array" },
+		"summary-position": { "enum": ["top", "bottom"] }
+	},
+	"title": "Checkov configuration file",
+	"type": "object"
+}
