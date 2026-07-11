@@ -1,0 +1,66 @@
+{
+	"$id": "https://schemas.lbrunner.net/mcp/servers.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"definitions": {
+		"server": {
+			"additionalProperties": true,
+			"anyOf": [
+				{ "required": ["command"] },
+				{ "required": ["url"] }
+			],
+			"description": "The de facto 'mcpServers' entry shape shared by Claude Desktop, Claude Code, Cursor, and Windsurf (VS Code uses 'servers' as the root key instead). Searched schemastore.org's catalog for an official/authoritative schema to reuse here; none is published for this shape (the closest hit, the MCP Registry's server.json, describes publishing a server for discovery, not a personal client config), so this is best-effort and kept free of any repo-local extensions.",
+			"properties": {
+				"args": {
+					"description": "CLI arguments passed to 'command'",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"command": {
+					"description": "Executable to launch for a stdio server",
+					"type": "string"
+				},
+				"env": {
+					"additionalProperties": { "type": "string" },
+					"description": "Environment variables passed to the stdio server process. Claude Code expands ${VAR} / ${VAR:-default} here; Claude Desktop does not",
+					"type": "object"
+				},
+				"headers": {
+					"additionalProperties": { "type": "string" },
+					"description": "HTTP headers sent to a remote (http/sse) server, e.g. Authorization",
+					"type": "object"
+				},
+				"type": {
+					"description": "Transport type. Omit for stdio servers (implied by 'command')",
+					"enum": ["stdio", "http", "sse"],
+					"type": "string"
+				},
+				"url": {
+					"description": "Endpoint for a remote (http/sse) server",
+					"format": "uri",
+					"type": "string"
+				}
+			},
+			"type": "object"
+		}
+	},
+	"description": "MCP client config file: a top-level 'mcpServers' map plus, as a repo-local extension used by github.com/LouisBrunner/ai's mcps/ catalog and its sync-mcps tool, sibling 'disabled'/'setup' keys describing the whole file (this catalog is one server per file). The 'mcpServers' map itself is the plain community shape with no extensions mixed in, see the 'server' definition for why.",
+	"properties": {
+		"disabled": {
+			"description": "Repo-local extension: when true, sync-mcps removes every server in this file's 'mcpServers' from all synced targets instead of applying it",
+			"type": "boolean"
+		},
+		"mcpServers": {
+			"additionalProperties": { "$ref": "#/definitions/server" },
+			"description": "Keyed by server name",
+			"type": "object"
+		},
+		"setup": {
+			"description": "Repo-local extension: shell commands documenting how to prepare the system for the server(s) in this file. Informational only, not executed automatically",
+			"items": { "type": "string" },
+			"type": "array"
+		}
+	},
+	"title": "MCP client config (mcpServers)",
+	"type": "object"
+}
