@@ -5,10 +5,7 @@
 	"definitions": {
 		"server": {
 			"additionalProperties": true,
-			"anyOf": [
-				{ "required": ["command"] },
-				{ "required": ["url"] }
-			],
+			"anyOf": [{ "required": ["command"] }, { "required": ["url"] }],
 			"description": "The de facto 'mcpServers' entry shape shared by Claude Desktop, Claude Code, Cursor, and Windsurf (VS Code uses 'servers' as the root key instead). Searched schemastore.org's catalog for an official/authoritative schema to reuse here; none is published for this shape (the closest hit, the MCP Registry's server.json, describes publishing a server for discovery, not a personal client config), so this is best-effort and kept free of any repo-local extensions.",
 			"properties": {
 				"args": {
