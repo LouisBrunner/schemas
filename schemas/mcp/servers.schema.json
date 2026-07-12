@@ -3,10 +3,36 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"additionalProperties": true,
 	"definitions": {
+		"launch": {
+			"additionalProperties": true,
+			"description": "Extension: how to foreground-launch a server not spawned by the client itself (e.g. a remote http/sse server). Not executed automatically",
+			"properties": {
+				"args": {
+					"description": "CLI arguments passed to 'command'",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"command": {
+					"description": "Executable to run in the foreground to start the server",
+					"type": "string"
+				},
+				"cwd": {
+					"description": "Working directory for the launched process",
+					"type": "string"
+				},
+				"env": {
+					"additionalProperties": { "type": "string" },
+					"description": "Environment variables passed to the launched process",
+					"type": "object"
+				}
+			},
+			"required": ["command"],
+			"type": "object"
+		},
 		"server": {
 			"additionalProperties": true,
 			"anyOf": [{ "required": ["command"] }, { "required": ["url"] }],
-			"description": "The de facto 'mcpServers' entry shape shared by Claude Desktop, Claude Code, Cursor, and Windsurf (VS Code uses 'servers' as the root key instead). Searched schemastore.org's catalog for an official/authoritative schema to reuse here; none is published for this shape (the closest hit, the MCP Registry's server.json, describes publishing a server for discovery, not a personal client config), so this is best-effort and kept free of any repo-local extensions.",
+			"description": "The de facto 'mcpServers' entry shape shared by Claude Desktop, Claude Code, Cursor, Windsurf, and Zed. No official schema is published for this shape, so this is best-effort.",
 			"properties": {
 				"args": {
 					"description": "CLI arguments passed to 'command'",
@@ -15,6 +41,10 @@
 				},
 				"command": {
 					"description": "Executable to launch for a stdio server",
+					"type": "string"
+				},
+				"cwd": {
+					"description": "Working directory for the stdio process, part of the MCP stdio transport spec. Not reliably honored by real-world clients — verify before relying on it.",
 					"type": "string"
 				},
 				"env": {
@@ -41,11 +71,14 @@
 			"type": "object"
 		}
 	},
-	"description": "MCP client config file: a top-level 'mcpServers' map plus, as a repo-local extension used by github.com/LouisBrunner/ai's mcps/ catalog and its sync-mcps tool, sibling 'disabled'/'setup' keys describing the whole file (this catalog is one server per file). The 'mcpServers' map itself is the plain community shape with no extensions mixed in, see the 'server' definition for why.",
+	"description": "MCP client config file: a 'mcpServers' map, plus repo-local 'disabled'/'setup'/'launch' extensions.",
 	"properties": {
 		"disabled": {
-			"description": "Repo-local extension: when true, sync-mcps removes every server in this file's 'mcpServers' from all synced targets instead of applying it",
+			"description": "Extension: when true, no server in this file is applied.",
 			"type": "boolean"
+		},
+		"launch": {
+			"$ref": "#/definitions/launch"
 		},
 		"mcpServers": {
 			"additionalProperties": { "$ref": "#/definitions/server" },
@@ -53,7 +86,7 @@
 			"type": "object"
 		},
 		"setup": {
-			"description": "Repo-local extension: shell commands documenting how to prepare the system for the server(s) in this file. Informational only, not executed automatically",
+			"description": "Extension: manual prep steps. Informational only, not executed automatically",
 			"items": { "type": "string" },
 			"type": "array"
 		}

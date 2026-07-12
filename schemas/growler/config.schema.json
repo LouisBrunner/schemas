@@ -2,7 +2,7 @@
 	"$id": "https://schemas.lbrunner.net/growler/config.schema.json",
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"additionalProperties": false,
-	"description": "Config file for growler, a personal wrapper around Homebrew that tracks installed packages and pinned versions per group. Derived directly from taproom.config.Config (settings/commands/taproom/config.py): the file has a single 'packages' table of tables, group -> package -> version.",
+	"description": "Config file for growler, a personal Homebrew wrapper that tracks installed packages and pinned versions per group.",
 	"properties": {
 		"packages": {
 			"additionalProperties": {
