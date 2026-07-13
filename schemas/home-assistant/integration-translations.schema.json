@@ -29,7 +29,9 @@
 				{ "$ref": "#/$defs/translationValue" },
 				{
 					"additionalProperties": { "$ref": "#/$defs/configPanel" },
-					"propertyNames": { "pattern": "^(_|[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?)$" },
+					"propertyNames": {
+						"pattern": "^(_|[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?)$"
+					},
 					"type": "object"
 				}
 			]
@@ -97,11 +99,15 @@
 									"additionalProperties": false,
 									"properties": {
 										"data": {
-											"additionalProperties": { "$ref": "#/$defs/translationValue" },
+											"additionalProperties": {
+												"$ref": "#/$defs/translationValue"
+											},
 											"type": "object"
 										},
 										"data_description": {
-											"additionalProperties": { "$ref": "#/$defs/translationValue" },
+											"additionalProperties": {
+												"$ref": "#/$defs/translationValue"
+											},
 											"type": "object"
 										},
 										"description": { "$ref": "#/$defs/translationValue" },
@@ -209,21 +215,35 @@
 			"additionalProperties": false,
 			"description": "Strings for this integration's device_trigger/device_condition/device_action platforms.",
 			"properties": {
-				"action_type": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" },
-				"condition_type": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" },
-				"extra_fields": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" },
+				"action_type": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"type": "object"
+				},
+				"condition_type": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"type": "object"
+				},
+				"extra_fields": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"type": "object"
+				},
 				"extra_fields_descriptions": {
 					"additionalProperties": { "$ref": "#/$defs/translationValue" },
 					"type": "object"
 				},
-				"trigger_subtype": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" },
-				"trigger_type": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" }
+				"trigger_subtype": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"type": "object"
+				},
+				"trigger_type": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"type": "object"
+				}
 			},
 			"type": "object"
 		},
 		"entity": {
 			"additionalProperties": {
-				"description": "Keyed by platform (sensor, switch, ...).",
 				"additionalProperties": {
 					"additionalProperties": false,
 					"description": "Keyed by this entity's translation_key.",
@@ -239,7 +259,12 @@
 								"additionalProperties": false,
 								"properties": {
 									"name": { "$ref": "#/$defs/translationValue" },
-									"state": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" }
+									"state": {
+										"additionalProperties": {
+											"$ref": "#/$defs/translationValue"
+										},
+										"type": "object"
+									}
 								},
 								"type": "object"
 							},
@@ -249,6 +274,7 @@
 					},
 					"type": "object"
 				},
+				"description": "Keyed by platform (sensor, switch, ...).",
 				"type": "object"
 			},
 			"description": "Per-entity-description translations (name/state/state_attributes), from homeassistant.helpers.entity_platform's translation_key mechanism. This is the section a custom integration's platform files (sensor.py, switch.py, ...) usually populate via 'translation_key' on their EntityDescription.",
@@ -260,13 +286,21 @@
 				"description": "Keyed by platform (sensor, switch, ...); the fallback name/state used when an entity has no translation_key of its own.",
 				"properties": {
 					"name": { "type": "string" },
-					"state": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" },
+					"state": {
+						"additionalProperties": { "$ref": "#/$defs/translationValue" },
+						"type": "object"
+					},
 					"state_attributes": {
 						"additionalProperties": {
 							"additionalProperties": false,
 							"properties": {
 								"name": { "type": "string" },
-								"state": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" }
+								"state": {
+									"additionalProperties": {
+										"$ref": "#/$defs/translationValue"
+									},
+									"type": "object"
+								}
 							},
 							"type": "object"
 						},
@@ -322,7 +356,10 @@
 					"fields": {
 						"description": "Either { key: 'translation' } (old format) or { key: {name, description} } (new format).",
 						"oneOf": [
-							{ "additionalProperties": { "type": "string" }, "type": "object" },
+							{
+								"additionalProperties": { "type": "string" },
+								"type": "object"
+							},
 							{
 								"additionalProperties": {
 									"additionalProperties": false,

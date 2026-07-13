@@ -15,7 +15,12 @@
 								"type": "string"
 							},
 							"installation_mode": {
-								"enum": ["allowed", "blocked", "force_installed", "normal_installed"],
+								"enum": [
+									"allowed",
+									"blocked",
+									"force_installed",
+									"normal_installed"
+								],
 								"type": "string"
 							},
 							"updates_disabled": {

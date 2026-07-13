@@ -4,10 +4,19 @@
 			"additionalProperties": false,
 			"description": "One automation, from homeassistant/components/automation/config.py PLATFORM_SCHEMA. 'trigger'/'condition'/'action' are the pre-2024.10 key names, still accepted as aliases of 'triggers'/'conditions'/'actions'. Trigger/condition/action bodies are intentionally left permissive: modeling every trigger platform (state, time, mqtt, webhook, ...), condition type, and action call would require pulling in each integration's own schema, the same scope boundary this repo's blueprint.schema.json already draws for the same reason.",
 			"properties": {
-				"action": { "$ref": "#/$defs/permissiveList", "description": "Deprecated alias of 'actions'." },
+				"action": {
+					"$ref": "#/$defs/permissiveList",
+					"description": "Deprecated alias of 'actions'."
+				},
 				"actions": { "$ref": "#/$defs/permissiveList" },
-				"alias": { "description": "Friendly name shown in the UI.", "type": "string" },
-				"condition": { "$ref": "#/$defs/permissiveList", "description": "Deprecated alias of 'conditions'." },
+				"alias": {
+					"description": "Friendly name shown in the UI.",
+					"type": "string"
+				},
+				"condition": {
+					"$ref": "#/$defs/permissiveList",
+					"description": "Deprecated alias of 'conditions'."
+				},
 				"conditions": { "$ref": "#/$defs/permissiveList" },
 				"description": { "type": "string" },
 				"hide_entity": { "deprecated": true, "type": "boolean" },
@@ -17,7 +26,10 @@
 				"max_exceeded": { "$ref": "#/$defs/logSeverity" },
 				"mode": { "$ref": "#/$defs/scriptMode" },
 				"trace": { "additionalProperties": true, "type": "object" },
-				"trigger": { "$ref": "#/$defs/permissiveList", "description": "Deprecated alias of 'triggers'." },
+				"trigger": {
+					"$ref": "#/$defs/permissiveList",
+					"description": "Deprecated alias of 'triggers'."
+				},
 				"trigger_variables": { "additionalProperties": true, "type": "object" },
 				"triggers": { "$ref": "#/$defs/permissiveList" },
 				"variables": { "additionalProperties": true, "type": "object" }
@@ -105,7 +117,10 @@
 						"description": "If true, the group is only 'on' when all members are on (AND), instead of any (OR).",
 						"type": "boolean"
 					},
-					"entities": { "items": { "type": "string" }, "type": ["array", "null"] },
+					"entities": {
+						"items": { "type": "string" },
+						"type": ["array", "null"]
+					},
 					"icon": { "type": "string" },
 					"name": { "type": "string" }
 				},
@@ -147,17 +162,26 @@
 					"type": "string"
 				},
 				"customize": {
-					"additionalProperties": { "additionalProperties": true, "type": "object" },
+					"additionalProperties": {
+						"additionalProperties": true,
+						"type": "object"
+					},
 					"description": "Per-entity-id attribute overrides, keyed by entity_id.",
 					"type": "object"
 				},
 				"customize_domain": {
-					"additionalProperties": { "additionalProperties": true, "type": "object" },
+					"additionalProperties": {
+						"additionalProperties": true,
+						"type": "object"
+					},
 					"description": "Per-domain attribute overrides, keyed by domain (e.g. 'light').",
 					"type": "object"
 				},
 				"customize_glob": {
-					"additionalProperties": { "additionalProperties": true, "type": "object" },
+					"additionalProperties": {
+						"additionalProperties": true,
+						"type": "object"
+					},
 					"description": "Per-entity-id-glob attribute overrides, keyed by a glob pattern.",
 					"type": "object"
 				},
@@ -256,15 +280,26 @@
 			"description": "homeassistant/components/http/__init__.py HTTP_SCHEMA.",
 			"properties": {
 				"base_url": { "deprecated": true, "type": "string" },
-				"cors_allowed_origins": { "items": { "type": "string" }, "type": "array" },
+				"cors_allowed_origins": {
+					"items": { "type": "string" },
+					"type": "array"
+				},
 				"ip_ban_enabled": { "default": true, "type": "boolean" },
 				"login_attempts_threshold": { "default": -1, "type": "integer" },
 				"server_host": { "items": { "type": "string" }, "type": "array" },
-				"server_port": { "default": 8123, "maximum": 65535, "minimum": 1, "type": "integer" },
+				"server_port": {
+					"default": 8123,
+					"maximum": 65535,
+					"minimum": 1,
+					"type": "integer"
+				},
 				"ssl_certificate": { "type": "string" },
 				"ssl_key": { "type": "string" },
 				"ssl_peer_certificate": { "type": "string" },
-				"ssl_profile": { "default": "modern", "enum": ["intermediate", "modern"] },
+				"ssl_profile": {
+					"default": "modern",
+					"enum": ["intermediate", "modern"]
+				},
 				"trusted_proxies": {
 					"description": "Requires use_x_forwarded_for to also be set (voluptuous Inclusive group).",
 					"items": { "type": "string" },
@@ -340,7 +375,11 @@
 					"icon": { "type": "string" },
 					"initial": { "type": "string" },
 					"name": { "type": "string" },
-					"options": { "items": { "type": "string" }, "minItems": 1, "type": "array" }
+					"options": {
+						"items": { "type": "string" },
+						"minItems": 1,
+						"type": "array"
+					}
 				},
 				"required": ["options"],
 				"type": "object"
@@ -357,7 +396,10 @@
 					"min": { "default": 0, "type": "integer" },
 					"mode": { "default": "text", "enum": ["text", "password"] },
 					"name": { "type": "string" },
-					"pattern": { "description": "A regular expression the value must match.", "type": "string" },
+					"pattern": {
+						"description": "A regular expression the value must match.",
+						"type": "string"
+					},
 					"unit_of_measurement": { "type": "string" }
 				},
 				"type": ["object", "null"]
@@ -446,9 +488,15 @@
 				"properties": {
 					"authentication": { "enum": ["basic", "digest"] },
 					"content_type": { "type": "string" },
-					"headers": { "additionalProperties": { "type": "string" }, "type": "object" },
+					"headers": {
+						"additionalProperties": { "type": "string" },
+						"type": "object"
+					},
 					"insecure_cipher": { "default": false, "type": "boolean" },
-					"method": { "default": "get", "enum": ["get", "patch", "post", "put", "delete"] },
+					"method": {
+						"default": "get",
+						"enum": ["get", "patch", "post", "put", "delete"]
+					},
 					"payload": { "type": "string" },
 					"skip_url_encoding": { "default": false, "type": "boolean" },
 					"timeout": { "default": 10, "type": "integer" },
@@ -538,12 +586,28 @@
 				"properties": {
 					"cron_pattern": { "type": "string" },
 					"delta_values": { "default": false, "type": "boolean" },
-					"meter_offset": { "default": 0, "description": "Days.", "type": "integer" },
-					"meter_type": { "enum": ["daily", "hourly", "monthly", "quarterly", "weekly", "yearly"] },
+					"meter_offset": {
+						"default": 0,
+						"description": "Days.",
+						"type": "integer"
+					},
+					"meter_type": {
+						"enum": [
+							"daily",
+							"hourly",
+							"monthly",
+							"quarterly",
+							"weekly",
+							"yearly"
+						]
+					},
 					"name": { "type": "string" },
 					"net_consumption": { "default": false, "type": "boolean" },
 					"periodically_resetting": { "default": true, "type": "boolean" },
-					"source": { "description": "entity_id of the source sensor.", "type": "string" },
+					"source": {
+						"description": "entity_id of the source sensor.",
+						"type": "string"
+					},
 					"tariffs": { "items": { "type": "string" }, "type": "array" },
 					"unique_id": { "type": "string" }
 				},
