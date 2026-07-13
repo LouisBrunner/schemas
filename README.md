@@ -27,7 +27,7 @@ Point your file at it the usual way:
 ## What's in here
 
 - `clippy/`: Rust Clippy's `clippy.toml`
-- `home-assistant/`: add-on `config.yaml`, `repository.yaml`, add-on translation strings, blueprint YAML, and core `configuration.yaml`
+- `home-assistant/`: add-on `config.yaml`, `repository.yaml`, add-on translation strings, blueprint YAML, core `configuration.yaml`, and integration `translations/<lang>.json`/`strings.json`
 - `checkov/`: Checkov's `.checkov.yaml`
 - `docker/`: the Docker CLI's `~/.docker/config.json`
 - `firefox/`: Firefox enterprise `policies.json`

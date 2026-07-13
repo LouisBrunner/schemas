@@ -1,0 +1,372 @@
+{
+	"$defs": {
+		"conditionTriggerOrService": {
+			"additionalProperties": false,
+			"properties": {
+				"description": { "$ref": "#/$defs/translationValue" },
+				"fields": {
+					"additionalProperties": {
+						"additionalProperties": false,
+						"properties": {
+							"description": { "$ref": "#/$defs/translationValue" },
+							"example": { "$ref": "#/$defs/translationValue" },
+							"name": { "type": "string" }
+						},
+						"required": ["name"],
+						"type": "object"
+					},
+					"propertyNames": { "$ref": "#/$defs/translationKey" },
+					"type": "object"
+				},
+				"name": { "$ref": "#/$defs/translationValue" }
+			},
+			"required": ["name", "description"],
+			"type": "object"
+		},
+		"configPanel": {
+			"description": "Recursive: either a translated leaf string, or a nested object of further translationKey/'_' -> configPanel.",
+			"oneOf": [
+				{ "$ref": "#/$defs/translationValue" },
+				{
+					"additionalProperties": { "$ref": "#/$defs/configPanel" },
+					"propertyNames": { "pattern": "^(_|[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?)$" },
+					"type": "object"
+				}
+			]
+		},
+		"dataEntryFlow": {
+			"additionalProperties": false,
+			"description": "Shape shared by 'config', 'options', and each 'config_subentries' entry -- homeassistant/config_entries.py's ConfigFlow/OptionsFlow, from script/hassfest/translations.py gen_data_entry_schema.",
+			"properties": {
+				"abort": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"description": "Keyed by the 'reason' passed to async_abort().",
+					"type": "object"
+				},
+				"create_entry": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"type": "object"
+				},
+				"error": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"description": "Keyed by the error code set in errors['base'] (or a field name for per-field errors).",
+					"type": "object"
+				},
+				"flow_title": {
+					"$ref": "#/$defs/translationValue",
+					"description": "Card title for a flow started by discovery, e.g. '{name}'. Placeholders come from context['title_placeholders']."
+				},
+				"initiate_flow": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"description": "Menu label shown when multiple discovery sources can start this flow.",
+					"properties": { "user": { "$ref": "#/$defs/translationValue" } },
+					"required": ["user"],
+					"type": "object"
+				},
+				"progress": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"description": "Keyed by the progress_action passed to async_show_progress().",
+					"type": "object"
+				},
+				"step": {
+					"additionalProperties": {
+						"additionalProperties": false,
+						"properties": {
+							"data": {
+								"additionalProperties": { "$ref": "#/$defs/translationValue" },
+								"description": "Keyed by the vol.Schema field name for this step's form.",
+								"type": "object"
+							},
+							"data_description": {
+								"additionalProperties": { "$ref": "#/$defs/translationValue" },
+								"description": "Helper text per field; every key here must also exist in 'data'.",
+								"type": "object"
+							},
+							"description": { "$ref": "#/$defs/translationValue" },
+							"menu_option_descriptions": {
+								"additionalProperties": { "$ref": "#/$defs/translationValue" },
+								"type": "object"
+							},
+							"menu_options": {
+								"additionalProperties": { "$ref": "#/$defs/translationValue" },
+								"description": "Keyed by the step_id passed to async_show_menu()'s menu_options.",
+								"type": "object"
+							},
+							"sections": {
+								"additionalProperties": {
+									"additionalProperties": false,
+									"properties": {
+										"data": {
+											"additionalProperties": { "$ref": "#/$defs/translationValue" },
+											"type": "object"
+										},
+										"data_description": {
+											"additionalProperties": { "$ref": "#/$defs/translationValue" },
+											"type": "object"
+										},
+										"description": { "$ref": "#/$defs/translationValue" },
+										"name": { "$ref": "#/$defs/translationValue" }
+									},
+									"type": "object"
+								},
+								"type": "object"
+							},
+							"submit": { "$ref": "#/$defs/translationValue" },
+							"title": { "$ref": "#/$defs/translationValue" }
+						},
+						"type": "object"
+					},
+					"description": "Keyed by the step_id (the 'xxx' in async_step_xxx).",
+					"type": "object"
+				},
+				"title": {
+					"$ref": "#/$defs/translationValue",
+					"deprecated": true,
+					"description": "Deprecated since HA 0.109 -- set the integration's title at the root of the file instead, unless it genuinely needs to differ from the flow's title."
+				}
+			},
+			"required": ["step"],
+			"type": "object"
+		},
+		"issue": {
+			"additionalProperties": false,
+			"description": "One repair issue, from script/hassfest/translations.py gen_issues_schema. Exactly one of 'description'/'fix_flow' must be set.",
+			"properties": {
+				"description": { "$ref": "#/$defs/translationValue" },
+				"fix_flow": { "$ref": "#/$defs/dataEntryFlow" },
+				"title": { "$ref": "#/$defs/translationValue" }
+			},
+			"required": ["title"],
+			"type": "object"
+		},
+		"translationKey": {
+			"description": "Approximates homeassistant/script/hassfest/translations.py RE_TRANSLATION_KEY: lowercase letters/digits/hyphen/underscore, no leading/trailing/doubled hyphen or underscore. Enforced at build/CI time by hassfest, not by this schema (JSON Schema propertyNames patterns can't express the 'no doubled separator' part precisely without lookaheads).",
+			"pattern": "^[a-z0-9]+(?:[_-][a-z0-9]+)*$"
+		},
+		"translationValue": {
+			"description": "A single translated string. Home Assistant additionally forbids HTML, raw URLs (use description placeholders instead), and placeholders inside single quotes -- not enforced here, checked by hassfest.",
+			"type": "string"
+		}
+	},
+	"$id": "https://schemas.lbrunner.net/home-assistant/integration-translations.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": false,
+	"description": "A Home Assistant integration's translations/<lang>.json (and the source-of-truth strings.json for core integrations), reverse-engineered from home-assistant/core's script/hassfest/translations.py gen_strings_schema as of the 2026.4.0 release, scoped to what a device/service-type custom integration actually uses (the auth-provider, onboarding, and hardware-config-flow schemas that only apply to a handful of core-only integration types are intentionally left out). DO NOT add a '$schema' key to the actual translations/<lang>.json file: Home Assistant's own loader (and hassfest's CI validation, which runs against custom integrations too via home-assistant/actions/hassfest) parses this file with a strict schema that has no 'extra=ALLOW_EXTRA' at the top level, so ANY unrecognized key -- '$schema' included -- fails validation outright. additionalProperties is explicitly false here for the same reason, and '$schema' is also explicitly excluded below as a second, unmissable guard against ever whitelisting it back in.",
+	"not": { "required": ["$schema"] },
+	"properties": {
+		"application_credentials": {
+			"additionalProperties": false,
+			"properties": { "description": { "$ref": "#/$defs/translationValue" } },
+			"type": "object"
+		},
+		"common": {
+			"additionalProperties": { "$ref": "#/$defs/translationValue" },
+			"description": "Free-standing reusable strings, referenced elsewhere via the '[%key:common::xxx%]' syntax.",
+			"type": "object"
+		},
+		"conditions": {
+			"additionalProperties": { "$ref": "#/$defs/conditionTriggerOrService" },
+			"description": "Automation condition types this integration provides, keyed by condition type.",
+			"type": "object"
+		},
+		"config": {
+			"$ref": "#/$defs/dataEntryFlow",
+			"description": "The main config_flow.py ConfigFlow. flow_title is technically accepted here too but belongs at the config_subentries/root level in modern integrations."
+		},
+		"config_panel": {
+			"$ref": "#/$defs/configPanel",
+			"description": "Strings for a custom admin panel, if this integration registers one."
+		},
+		"config_subentries": {
+			"additionalProperties": { "$ref": "#/$defs/dataEntryFlow" },
+			"description": "One entry per config_subentries subentry type (HA 2024.11+), keyed by subentry type.",
+			"type": "object"
+		},
+		"conversation": {
+			"additionalProperties": false,
+			"description": "Strings for a conversation agent this integration provides.",
+			"properties": {
+				"agent": {
+					"additionalProperties": false,
+					"properties": { "done": { "$ref": "#/$defs/translationValue" } },
+					"required": ["done"],
+					"type": "object"
+				}
+			},
+			"required": ["agent"],
+			"type": "object"
+		},
+		"device": {
+			"additionalProperties": {
+				"additionalProperties": false,
+				"properties": { "name": { "$ref": "#/$defs/translationValue" } },
+				"type": "object"
+			},
+			"description": "Default device name templates, keyed by a device type slug used in DeviceInfo.",
+			"type": "object"
+		},
+		"device_automation": {
+			"additionalProperties": false,
+			"description": "Strings for this integration's device_trigger/device_condition/device_action platforms.",
+			"properties": {
+				"action_type": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" },
+				"condition_type": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" },
+				"extra_fields": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" },
+				"extra_fields_descriptions": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"type": "object"
+				},
+				"trigger_subtype": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" },
+				"trigger_type": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" }
+			},
+			"type": "object"
+		},
+		"entity": {
+			"additionalProperties": {
+				"description": "Keyed by platform (sensor, switch, ...).",
+				"additionalProperties": {
+					"additionalProperties": false,
+					"description": "Keyed by this entity's translation_key.",
+					"properties": {
+						"name": { "$ref": "#/$defs/translationValue" },
+						"state": {
+							"additionalProperties": { "$ref": "#/$defs/translationValue" },
+							"description": "Keyed by the raw state value (e.g. an enum sensor's options).",
+							"type": "object"
+						},
+						"state_attributes": {
+							"additionalProperties": {
+								"additionalProperties": false,
+								"properties": {
+									"name": { "$ref": "#/$defs/translationValue" },
+									"state": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" }
+								},
+								"type": "object"
+							},
+							"type": "object"
+						},
+						"unit_of_measurement": { "$ref": "#/$defs/translationValue" }
+					},
+					"type": "object"
+				},
+				"type": "object"
+			},
+			"description": "Per-entity-description translations (name/state/state_attributes), from homeassistant.helpers.entity_platform's translation_key mechanism. This is the section a custom integration's platform files (sensor.py, switch.py, ...) usually populate via 'translation_key' on their EntityDescription.",
+			"type": "object"
+		},
+		"entity_component": {
+			"additionalProperties": {
+				"additionalProperties": false,
+				"description": "Keyed by platform (sensor, switch, ...); the fallback name/state used when an entity has no translation_key of its own.",
+				"properties": {
+					"name": { "type": "string" },
+					"state": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" },
+					"state_attributes": {
+						"additionalProperties": {
+							"additionalProperties": false,
+							"properties": {
+								"name": { "type": "string" },
+								"state": { "additionalProperties": { "$ref": "#/$defs/translationValue" }, "type": "object" }
+							},
+							"type": "object"
+						},
+						"type": "object"
+					}
+				},
+				"type": "object"
+			},
+			"type": "object"
+		},
+		"exceptions": {
+			"additionalProperties": {
+				"additionalProperties": false,
+				"properties": { "message": { "$ref": "#/$defs/translationValue" } },
+				"type": "object"
+			},
+			"description": "Translated exception messages for HomeAssistantError subclasses that carry a translation_key, keyed by that translation_key.",
+			"type": "object"
+		},
+		"issues": {
+			"additionalProperties": { "$ref": "#/$defs/issue" },
+			"description": "Repair issues raised via homeassistant.helpers.issue_registry, keyed by issue_id.",
+			"type": "object"
+		},
+		"options": {
+			"$ref": "#/$defs/dataEntryFlow",
+			"description": "The OptionsFlow, if config_flow.py defines async_get_options_flow."
+		},
+		"preview_features": {
+			"additionalProperties": {
+				"additionalProperties": false,
+				"properties": {
+					"description": { "$ref": "#/$defs/translationValue" },
+					"disable_confirmation": { "$ref": "#/$defs/translationValue" },
+					"enable_confirmation": { "$ref": "#/$defs/translationValue" },
+					"name": { "$ref": "#/$defs/translationValue" }
+				},
+				"required": ["name", "description"],
+				"type": "object"
+			},
+			"type": "object"
+		},
+		"selector": {
+			"additionalProperties": {
+				"additionalProperties": false,
+				"description": "Keyed by the selector's own domain/name.",
+				"properties": {
+					"choices": {
+						"additionalProperties": { "$ref": "#/$defs/translationValue" },
+						"propertyNames": { "$ref": "#/$defs/translationKey" },
+						"type": "object"
+					},
+					"fields": {
+						"description": "Either { key: 'translation' } (old format) or { key: {name, description} } (new format).",
+						"oneOf": [
+							{ "additionalProperties": { "type": "string" }, "type": "object" },
+							{
+								"additionalProperties": {
+									"additionalProperties": false,
+									"properties": {
+										"description": { "$ref": "#/$defs/translationValue" },
+										"name": { "type": "string" }
+									},
+									"required": ["name"],
+									"type": "object"
+								},
+								"type": "object"
+							}
+						]
+					},
+					"options": {
+						"additionalProperties": { "$ref": "#/$defs/translationValue" },
+						"propertyNames": { "$ref": "#/$defs/translationKey" },
+						"type": "object"
+					},
+					"unit_of_measurement": {
+						"additionalProperties": { "$ref": "#/$defs/translationValue" },
+						"propertyNames": { "$ref": "#/$defs/translationKey" },
+						"type": "object"
+					}
+				},
+				"type": "object"
+			},
+			"type": "object"
+		},
+		"services": {
+			"additionalProperties": { "$ref": "#/$defs/conditionTriggerOrService" },
+			"description": "Custom services this integration registers, keyed by service name. Unlike conditions/triggers, a service's 'fields' entries may also carry a 'sections' grouping -- modeled loosely via 'fields' already accepting arbitrary extra structure through conditionTriggerOrService.",
+			"type": "object"
+		},
+		"title": {
+			"$ref": "#/$defs/translationValue",
+			"description": "Integration display name. Only needs to be set if it must differ from manifest.json's 'name'."
+		},
+		"triggers": {
+			"additionalProperties": { "$ref": "#/$defs/conditionTriggerOrService" },
+			"description": "Automation trigger types this integration provides, keyed by trigger type.",
+			"type": "object"
+		}
+	},
+	"title": "Home Assistant integration translations file",
+	"type": "object"
+}
