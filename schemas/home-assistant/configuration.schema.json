@@ -1,0 +1,580 @@
+{
+	"$defs": {
+		"automationItem": {
+			"additionalProperties": false,
+			"description": "One automation, from homeassistant/components/automation/config.py PLATFORM_SCHEMA. 'trigger'/'condition'/'action' are the pre-2024.10 key names, still accepted as aliases of 'triggers'/'conditions'/'actions'. Trigger/condition/action bodies are intentionally left permissive: modeling every trigger platform (state, time, mqtt, webhook, ...), condition type, and action call would require pulling in each integration's own schema, the same scope boundary this repo's blueprint.schema.json already draws for the same reason.",
+			"properties": {
+				"action": { "$ref": "#/$defs/permissiveList", "description": "Deprecated alias of 'actions'." },
+				"actions": { "$ref": "#/$defs/permissiveList" },
+				"alias": { "description": "Friendly name shown in the UI.", "type": "string" },
+				"condition": { "$ref": "#/$defs/permissiveList", "description": "Deprecated alias of 'conditions'." },
+				"conditions": { "$ref": "#/$defs/permissiveList" },
+				"description": { "type": "string" },
+				"hide_entity": { "deprecated": true, "type": "boolean" },
+				"id": { "type": "string" },
+				"initial_state": { "type": "boolean" },
+				"max": { "default": 10, "minimum": 1, "type": "integer" },
+				"max_exceeded": { "$ref": "#/$defs/logSeverity" },
+				"mode": { "$ref": "#/$defs/scriptMode" },
+				"trace": { "additionalProperties": true, "type": "object" },
+				"trigger": { "$ref": "#/$defs/permissiveList", "description": "Deprecated alias of 'triggers'." },
+				"trigger_variables": { "additionalProperties": true, "type": "object" },
+				"triggers": { "$ref": "#/$defs/permissiveList" },
+				"variables": { "additionalProperties": true, "type": "object" }
+			},
+			"type": "object"
+		},
+		"entityFilterSection": {
+			"additionalProperties": false,
+			"description": "One side (include: or exclude:) of a nested entity filter, from homeassistant/helpers/entityfilter.py INCLUDE_EXCLUDE_FILTER_SCHEMA_INNER.",
+			"properties": {
+				"domains": { "items": { "type": "string" }, "type": "array" },
+				"entities": { "items": { "type": "string" }, "type": "array" },
+				"entity_globs": { "items": { "type": "string" }, "type": "array" }
+			},
+			"type": "object"
+		},
+		"logSeverity": {
+			"description": "Case-insensitive at runtime (voluptuous coerces to uppercase); both cases are listed so lowercase config files still validate.",
+			"enum": [
+				"NOTSET",
+				"notset",
+				"DEBUG",
+				"debug",
+				"INFO",
+				"info",
+				"WARNING",
+				"warning",
+				"WARN",
+				"warn",
+				"ERROR",
+				"error",
+				"CRITICAL",
+				"critical",
+				"FATAL",
+				"fatal"
+			]
+		},
+		"permissiveList": {
+			"description": "Left permissive -- see the containing schema's description for why.",
+			"items": { "additionalProperties": true, "type": "object" },
+			"type": "array"
+		},
+		"scriptMode": {
+			"default": "single",
+			"description": "From homeassistant/helpers/script.py SCRIPT_MODE_CHOICES.",
+			"enum": ["single", "restart", "queued", "parallel"]
+		}
+	},
+	"$id": "https://schemas.lbrunner.net/home-assistant/configuration.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "Home Assistant's configuration.yaml. Documented at https://www.home-assistant.io/docs/configuration/. There is no official published schema for this file: every one of the 1000+ built-in and custom integrations can contribute its own top-level key with its own voluptuous-validated shape, decided at runtime by whichever integrations happen to be installed, so a fully exhaustive static schema is not possible. The always-present core keys plus the most commonly hand-authored YAML blocks (helpers, automation/script/scene, http/recorder/logbook, etc.) are modeled strictly, reverse-engineered from home-assistant/core's voluptuous schemas as of the 2026.4.0 release (see each property's description for the exact source file). Any other top-level key (a platform-based integration domain, e.g. 'sensor', 'mqtt', or a custom_components domain) is left permissive.",
+	"properties": {
+		"automation": {
+			"description": "homeassistant/components/automation/config.py. A single automation object (not wrapped in a list) is also accepted at runtime and normalized internally.",
+			"items": { "$ref": "#/$defs/automationItem" },
+			"type": ["array", "object"]
+		},
+		"counter": {
+			"additionalProperties": {
+				"additionalProperties": false,
+				"properties": {
+					"icon": { "type": "string" },
+					"initial": { "default": 0, "minimum": 0, "type": "integer" },
+					"maximum": { "type": ["integer", "null"] },
+					"minimum": { "type": ["integer", "null"] },
+					"name": { "type": "string" },
+					"restore": { "default": true, "type": "boolean" },
+					"step": { "default": 1, "minimum": 0, "type": "integer" }
+				},
+				"type": ["object", "null"]
+			},
+			"description": "homeassistant/components/counter/__init__.py. Keyed by object_id.",
+			"type": "object"
+		},
+		"default_config": {
+			"description": "Enables the default_config integration, which bundles most commonly-used integrations. Takes no options.",
+			"type": ["null", "object"]
+		},
+		"group": {
+			"additionalProperties": {
+				"description": "A bare list of entity IDs is also accepted as shorthand for {entities: [...]}.",
+				"properties": {
+					"all": {
+						"description": "If true, the group is only 'on' when all members are on (AND), instead of any (OR).",
+						"type": "boolean"
+					},
+					"entities": { "items": { "type": "string" }, "type": ["array", "null"] },
+					"icon": { "type": "string" },
+					"name": { "type": "string" }
+				},
+				"type": ["object", "array"]
+			},
+			"description": "homeassistant/components/group/__init__.py GROUP_SCHEMA. Keyed by object_id.",
+			"type": "object"
+		},
+		"homeassistant": {
+			"additionalProperties": true,
+			"description": "Core configuration, from homeassistant/core_config.py CORE_CONFIG_SCHEMA. additionalProperties is left true because 'customize'/'customize_domain'/'customize_glob' are keyed by arbitrary entity_id/domain/glob strings, and new core options are occasionally added between releases.",
+			"properties": {
+				"allowlist_external_dirs": {
+					"description": "Directories Home Assistant is allowed to read files from (e.g. for the local media source).",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"allowlist_external_urls": {
+					"description": "URL prefixes Home Assistant is allowed to fetch/link to.",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"auth_mfa_modules": {
+					"description": "Multi-factor auth module configuration, left permissive (shape depends on the module's own schema).",
+					"items": { "additionalProperties": true, "type": "object" },
+					"type": "array"
+				},
+				"auth_providers": {
+					"description": "Auth provider configuration, left permissive (shape depends on the provider's own schema). 'insecure_example' is rejected by Home Assistant itself outside of tests.",
+					"items": { "additionalProperties": true, "type": "object" },
+					"type": "array"
+				},
+				"country": {
+					"description": "ISO 3166 country code, e.g. 'US', 'GB'.",
+					"type": "string"
+				},
+				"currency": {
+					"description": "ISO 4217 currency code, e.g. 'USD', 'EUR'.",
+					"type": "string"
+				},
+				"customize": {
+					"additionalProperties": { "additionalProperties": true, "type": "object" },
+					"description": "Per-entity-id attribute overrides, keyed by entity_id.",
+					"type": "object"
+				},
+				"customize_domain": {
+					"additionalProperties": { "additionalProperties": true, "type": "object" },
+					"description": "Per-domain attribute overrides, keyed by domain (e.g. 'light').",
+					"type": "object"
+				},
+				"customize_glob": {
+					"additionalProperties": { "additionalProperties": true, "type": "object" },
+					"description": "Per-entity-id-glob attribute overrides, keyed by a glob pattern.",
+					"type": "object"
+				},
+				"debug": {
+					"description": "Enables debug mode (verbose logging, disables some production safeguards).",
+					"type": "boolean"
+				},
+				"elevation": {
+					"description": "Elevation above sea level in meters, used for sun/weather calculations.",
+					"type": "integer"
+				},
+				"external_url": {
+					"description": "The externally-reachable base URL for this Home Assistant instance.",
+					"format": "uri",
+					"type": "string"
+				},
+				"internal_url": {
+					"description": "The internally-reachable base URL for this Home Assistant instance.",
+					"format": "uri",
+					"type": "string"
+				},
+				"language": {
+					"description": "IETF language tag for the frontend/voice default language, e.g. 'en'.",
+					"type": "string"
+				},
+				"latitude": {
+					"maximum": 90,
+					"minimum": -90,
+					"type": "number"
+				},
+				"longitude": {
+					"maximum": 180,
+					"minimum": -180,
+					"type": "number"
+				},
+				"media_dirs": {
+					"additionalProperties": { "type": "string" },
+					"description": "Named local media directories exposed to the media_source integration, keyed by a slug.",
+					"type": "object"
+				},
+				"name": {
+					"description": "Friendly name for this Home Assistant instance/location.",
+					"type": "string"
+				},
+				"packages": {
+					"additionalProperties": true,
+					"description": "Named blocks of configuration merged back into the top-level document, keyed by package name. Each package's shape is the same as the top-level document, so it is left permissive.",
+					"type": "object"
+				},
+				"radius": {
+					"description": "Radius in meters around the configured location considered 'home', used by zone-based logic.",
+					"minimum": 0,
+					"type": "integer"
+				},
+				"temperature_unit": {
+					"deprecated": true,
+					"description": "Deprecated: derived from unit_system instead.",
+					"enum": ["C", "F"]
+				},
+				"time_zone": {
+					"description": "IANA time zone name, e.g. 'Europe/London'.",
+					"type": "string"
+				},
+				"unit_system": {
+					"enum": ["metric", "us_customary", "imperial"]
+				},
+				"webrtc": {
+					"additionalProperties": false,
+					"description": "Global WebRTC ICE server configuration for camera streaming.",
+					"properties": {
+						"ice_servers": {
+							"items": {
+								"additionalProperties": false,
+								"properties": {
+									"credential": { "type": "string" },
+									"url": {
+										"items": { "type": "string" },
+										"type": ["string", "array"]
+									},
+									"username": { "type": "string" }
+								},
+								"required": ["url"],
+								"type": "object"
+							},
+							"type": "array"
+						}
+					},
+					"required": ["ice_servers"],
+					"type": "object"
+				}
+			},
+			"type": "object"
+		},
+		"http": {
+			"additionalProperties": false,
+			"description": "homeassistant/components/http/__init__.py HTTP_SCHEMA.",
+			"properties": {
+				"base_url": { "deprecated": true, "type": "string" },
+				"cors_allowed_origins": { "items": { "type": "string" }, "type": "array" },
+				"ip_ban_enabled": { "default": true, "type": "boolean" },
+				"login_attempts_threshold": { "default": -1, "type": "integer" },
+				"server_host": { "items": { "type": "string" }, "type": "array" },
+				"server_port": { "default": 8123, "maximum": 65535, "minimum": 1, "type": "integer" },
+				"ssl_certificate": { "type": "string" },
+				"ssl_key": { "type": "string" },
+				"ssl_peer_certificate": { "type": "string" },
+				"ssl_profile": { "default": "modern", "enum": ["intermediate", "modern"] },
+				"trusted_proxies": {
+					"description": "Requires use_x_forwarded_for to also be set (voluptuous Inclusive group).",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"use_x_forwarded_for": {
+					"description": "Requires trusted_proxies to also be set (voluptuous Inclusive group).",
+					"type": "boolean"
+				},
+				"use_x_frame_options": { "default": true, "type": "boolean" }
+			},
+			"type": "object"
+		},
+		"input_boolean": {
+			"additionalProperties": {
+				"properties": {
+					"icon": { "type": "string" },
+					"initial": { "type": "boolean" },
+					"name": { "type": "string" }
+				},
+				"type": ["object", "null"]
+			},
+			"description": "homeassistant/components/input_boolean/__init__.py. Keyed by object_id.",
+			"type": "object"
+		},
+		"input_button": {
+			"additionalProperties": {
+				"properties": {
+					"icon": { "type": "string" },
+					"name": { "type": "string" }
+				},
+				"type": ["object", "null"]
+			},
+			"description": "homeassistant/components/input_button/__init__.py. Keyed by object_id.",
+			"type": "object"
+		},
+		"input_datetime": {
+			"additionalProperties": {
+				"description": "At least one of has_date/has_time must be true.",
+				"properties": {
+					"has_date": { "default": false, "type": "boolean" },
+					"has_time": { "default": false, "type": "boolean" },
+					"icon": { "type": "string" },
+					"initial": { "type": "string" },
+					"name": { "type": "string" }
+				},
+				"type": "object"
+			},
+			"description": "homeassistant/components/input_datetime/__init__.py. Keyed by object_id.",
+			"type": "object"
+		},
+		"input_number": {
+			"additionalProperties": {
+				"properties": {
+					"icon": { "type": "string" },
+					"initial": { "type": "number" },
+					"max": { "type": "number" },
+					"min": { "type": "number" },
+					"mode": { "default": "slider", "enum": ["box", "slider"] },
+					"name": { "type": "string" },
+					"step": { "default": 1, "exclusiveMinimum": 0, "type": "number" },
+					"unit_of_measurement": { "type": "string" }
+				},
+				"required": ["min", "max"],
+				"type": "object"
+			},
+			"description": "homeassistant/components/input_number/__init__.py. Keyed by object_id.",
+			"type": "object"
+		},
+		"input_select": {
+			"additionalProperties": {
+				"properties": {
+					"icon": { "type": "string" },
+					"initial": { "type": "string" },
+					"name": { "type": "string" },
+					"options": { "items": { "type": "string" }, "minItems": 1, "type": "array" }
+				},
+				"required": ["options"],
+				"type": "object"
+			},
+			"description": "homeassistant/components/input_select/__init__.py. Keyed by object_id.",
+			"type": "object"
+		},
+		"input_text": {
+			"additionalProperties": {
+				"properties": {
+					"icon": { "type": "string" },
+					"initial": { "default": "", "type": "string" },
+					"max": { "default": 100, "type": "integer" },
+					"min": { "default": 0, "type": "integer" },
+					"mode": { "default": "text", "enum": ["text", "password"] },
+					"name": { "type": "string" },
+					"pattern": { "description": "A regular expression the value must match.", "type": "string" },
+					"unit_of_measurement": { "type": "string" }
+				},
+				"type": ["object", "null"]
+			},
+			"description": "homeassistant/components/input_text/__init__.py. Keyed by object_id.",
+			"type": "object"
+		},
+		"logbook": {
+			"additionalProperties": false,
+			"description": "homeassistant/components/logbook/__init__.py CONFIG_SCHEMA -- just the shared nested entity filter, no logbook-specific options.",
+			"properties": {
+				"exclude": { "$ref": "#/$defs/entityFilterSection" },
+				"include": { "$ref": "#/$defs/entityFilterSection" }
+			},
+			"type": "object"
+		},
+		"logger": {
+			"additionalProperties": false,
+			"description": "Configuration for the built-in logger integration, from homeassistant/components/logger.",
+			"properties": {
+				"default": {
+					"$ref": "#/$defs/logSeverity",
+					"description": "Default log level for any logger not matched in 'logs'."
+				},
+				"filters": {
+					"additionalProperties": {
+						"description": "Regular expression(s); matching log records are dropped.",
+						"items": { "type": "string" },
+						"type": "array"
+					},
+					"description": "Per-logger-name regex filters.",
+					"type": "object"
+				},
+				"logs": {
+					"additionalProperties": { "$ref": "#/$defs/logSeverity" },
+					"description": "Per-logger-name (usually a Python module path, e.g. 'custom_components.gwell_ipcam') log level overrides.",
+					"type": "object"
+				}
+			},
+			"type": "object"
+		},
+		"person": {
+			"description": "homeassistant/components/person/__init__.py PERSON_SCHEMA.",
+			"items": {
+				"additionalProperties": false,
+				"properties": {
+					"device_trackers": { "items": { "type": "string" }, "type": "array" },
+					"id": { "type": "string" },
+					"name": { "type": "string" },
+					"picture": { "type": "string" },
+					"user_id": { "type": "string" }
+				},
+				"required": ["id", "name"],
+				"type": "object"
+			},
+			"type": "array"
+		},
+		"recorder": {
+			"additionalProperties": false,
+			"description": "homeassistant/components/recorder/__init__.py CONFIG_SCHEMA, extending the shared nested entity filter with purge/db settings. 'exclude' additionally accepts 'event_types' on top of the shared filter fields.",
+			"properties": {
+				"auto_purge": { "default": true, "type": "boolean" },
+				"auto_repack": { "default": true, "type": "boolean" },
+				"commit_interval": { "type": "number" },
+				"db_url": { "type": "string" },
+				"exclude": {
+					"additionalProperties": false,
+					"properties": {
+						"domains": { "items": { "type": "string" }, "type": "array" },
+						"entities": { "items": { "type": "string" }, "type": "array" },
+						"entity_globs": { "items": { "type": "string" }, "type": "array" },
+						"event_types": { "items": { "type": "string" }, "type": "array" }
+					},
+					"type": "object"
+				},
+				"include": { "$ref": "#/$defs/entityFilterSection" },
+				"purge_interval": { "default": 1, "minimum": 0, "type": "integer" },
+				"purge_keep_days": { "default": 10, "minimum": 1, "type": "integer" }
+			},
+			"type": "object"
+		},
+		"rest_command": {
+			"additionalProperties": {
+				"additionalProperties": false,
+				"description": "homeassistant/components/rest_command/__init__.py COMMAND_SCHEMA. 'url'/'headers'/'payload' are Jinja2 templates rendered at call time.",
+				"properties": {
+					"authentication": { "enum": ["basic", "digest"] },
+					"content_type": { "type": "string" },
+					"headers": { "additionalProperties": { "type": "string" }, "type": "object" },
+					"insecure_cipher": { "default": false, "type": "boolean" },
+					"method": { "default": "get", "enum": ["get", "patch", "post", "put", "delete"] },
+					"payload": { "type": "string" },
+					"skip_url_encoding": { "default": false, "type": "boolean" },
+					"timeout": { "default": 10, "type": "integer" },
+					"url": { "type": "string" },
+					"verify_ssl": { "default": true, "type": "boolean" }
+				},
+				"required": ["url"],
+				"type": "object"
+			},
+			"description": "homeassistant/components/rest_command/__init__.py. Keyed by command name.",
+			"type": "object"
+		},
+		"scene": {
+			"description": "The built-in homeassistant.scene platform's STATES schema (homeassistant/components/homeassistant/scene.py).",
+			"items": {
+				"properties": {
+					"entities": {
+						"additionalProperties": {
+							"description": "Either a bare state string, or an object with 'state' plus arbitrary attributes to set.",
+							"type": ["string", "object"]
+						},
+						"type": "object"
+					},
+					"icon": { "type": "string" },
+					"id": { "type": "string" },
+					"name": { "type": "string" }
+				},
+				"required": ["name", "entities"],
+				"type": "object"
+			},
+			"type": "array"
+		},
+		"script": {
+			"additionalProperties": {
+				"additionalProperties": false,
+				"description": "Same item shape as an automation's action list plus mode/max, from homeassistant/helpers/script.py.",
+				"properties": {
+					"alias": { "type": "string" },
+					"description": { "type": "string" },
+					"fields": {
+						"additionalProperties": true,
+						"description": "Input field definitions shown when the script is called as a service.",
+						"type": "object"
+					},
+					"icon": { "type": "string" },
+					"max": { "default": 10, "minimum": 1, "type": "integer" },
+					"max_exceeded": { "$ref": "#/$defs/logSeverity" },
+					"mode": { "$ref": "#/$defs/scriptMode" },
+					"sequence": { "$ref": "#/$defs/permissiveList" },
+					"variables": { "additionalProperties": true, "type": "object" }
+				},
+				"type": "object"
+			},
+			"description": "homeassistant/components/script. Keyed by object_id.",
+			"type": "object"
+		},
+		"shell_command": {
+			"additionalProperties": { "type": "string" },
+			"description": "homeassistant/components/shell_command/__init__.py. Keyed by command name; value is a Jinja2-templated shell command string.",
+			"type": "object"
+		},
+		"sun": {
+			"description": "homeassistant/components/sun -- config_entry-only, takes no YAML options besides being present.",
+			"type": ["null", "object"]
+		},
+		"timer": {
+			"additionalProperties": {
+				"properties": {
+					"duration": {
+						"default": "00:00:00",
+						"description": "HH:MM:SS, or a plain number of seconds.",
+						"type": ["string", "number"]
+					},
+					"icon": { "type": "string" },
+					"name": { "type": "string" },
+					"restore": { "default": false, "type": "boolean" }
+				},
+				"type": ["object", "null"]
+			},
+			"description": "homeassistant/components/timer/__init__.py. Keyed by object_id.",
+			"type": "object"
+		},
+		"utility_meter": {
+			"additionalProperties": {
+				"additionalProperties": false,
+				"description": "homeassistant/components/utility_meter/__init__.py METER_CONFIG_SCHEMA. Use either 'cron_pattern' or 'meter_type', not both.",
+				"properties": {
+					"cron_pattern": { "type": "string" },
+					"delta_values": { "default": false, "type": "boolean" },
+					"meter_offset": { "default": 0, "description": "Days.", "type": "integer" },
+					"meter_type": { "enum": ["daily", "hourly", "monthly", "quarterly", "weekly", "yearly"] },
+					"name": { "type": "string" },
+					"net_consumption": { "default": false, "type": "boolean" },
+					"periodically_resetting": { "default": true, "type": "boolean" },
+					"source": { "description": "entity_id of the source sensor.", "type": "string" },
+					"tariffs": { "items": { "type": "string" }, "type": "array" },
+					"unique_id": { "type": "string" }
+				},
+				"required": ["source"],
+				"type": "object"
+			},
+			"description": "homeassistant/components/utility_meter/__init__.py. Keyed by object_id.",
+			"type": "object"
+		},
+		"zone": {
+			"description": "homeassistant/components/zone/__init__.py.",
+			"items": {
+				"additionalProperties": false,
+				"properties": {
+					"icon": { "type": "string" },
+					"latitude": { "maximum": 90, "minimum": -90, "type": "number" },
+					"longitude": { "maximum": 180, "minimum": -180, "type": "number" },
+					"name": { "type": "string" },
+					"passive": {
+						"default": false,
+						"description": "Passive zones are used for automation triggers but excluded from the 'closest zone' calculation shown on the map.",
+						"type": "boolean"
+					},
+					"radius": { "default": 100, "minimum": 0, "type": "number" }
+				},
+				"required": ["name", "latitude", "longitude"],
+				"type": "object"
+			},
+			"type": "array"
+		}
+	},
+	"title": "Home Assistant configuration.yaml",
+	"type": "object"
+}

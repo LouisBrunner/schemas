@@ -27,9 +27,10 @@ Point your file at it the usual way:
 ## What's in here
 
 - `clippy/`: Rust Clippy's `clippy.toml`
-- `home-assistant/`: add-on `config.yaml`, `repository.yaml`, add-on translation strings, and blueprint YAML
+- `home-assistant/`: add-on `config.yaml`, `repository.yaml`, add-on translation strings, blueprint YAML, and core `configuration.yaml`
 - `checkov/`: Checkov's `.checkov.yaml`
 - `docker/`: the Docker CLI's `~/.docker/config.json`
+- `firefox/`: Firefox enterprise `policies.json`
 - `karabiner/`: Karabiner-Elements' `karabiner.json`
 - `mcp/`: the de facto `mcpServers` MCP client config shape (Claude Desktop, Claude Code, Cursor, Windsurf)
 - `ollama/`: Ollama's `config.json` and `server.json`

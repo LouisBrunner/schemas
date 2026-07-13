@@ -1,0 +1,37 @@
+{
+	"$id": "https://schemas.lbrunner.net/firefox/policies.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "Firefox enterprise policies.json (distribution/policies.json). Best-effort schema: Mozilla ships templates (mozilla/policy-templates) but no formal JSON Schema, and new policies are added every release, so this only models the general 'policies' envelope plus ExtensionSettings, the policy used to side-load unlisted/signed extensions outside AMO. See https://mozilla.github.io/policy-templates/ and https://github.com/mozilla/policy-templates for the full, ever-growing set of top-level policy keys.",
+	"properties": {
+		"policies": {
+			"additionalProperties": true,
+			"properties": {
+				"ExtensionSettings": {
+					"additionalProperties": {
+						"properties": {
+							"install_url": {
+								"description": "file:// or https:// URL to a signed .xpi",
+								"type": "string"
+							},
+							"installation_mode": {
+								"enum": ["allowed", "blocked", "force_installed", "normal_installed"],
+								"type": "string"
+							},
+							"updates_disabled": {
+								"type": "boolean"
+							}
+						},
+						"type": "object"
+					},
+					"description": "Keyed by extension ID (browser_specific_settings.gecko.id) or '*' for the default",
+					"type": "object"
+				}
+			},
+			"type": "object"
+		}
+	},
+	"required": ["policies"],
+	"title": "Firefox distribution/policies.json",
+	"type": "object"
+}
