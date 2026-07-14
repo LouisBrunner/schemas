@@ -1,0 +1,63 @@
+{
+	"$id": "https://schemas.lbrunner.net/hadolint/config.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": false,
+	"description": "Config file for the hadolint Dockerfile linter (.hadolint.yaml / .hadolint.yml). Keys mirror the schema documented at https://github.com/hadolint/hadolint#configure; hadolint has no officially published JSON Schema of its own.",
+	"properties": {
+		"disable-ignore-pragma": {
+			"description": "Disable the `# hadolint ignore=DLxxxx` inline pragma",
+			"type": "boolean"
+		},
+		"failure-threshold": {
+			"description": "Minimum severity that causes a non-zero exit code",
+			"enum": ["error", "warning", "info", "style", "ignore", "none"]
+		},
+		"format": {
+			"description": "Output format",
+			"enum": [
+				"tty",
+				"json",
+				"checkstyle",
+				"codeclimate",
+				"gitlab_codeclimate",
+				"gnu",
+				"codacy",
+				"sonarqube",
+				"sarif",
+				"junit"
+			]
+		},
+		"ignored": {
+			"description": "Rule codes to ignore entirely",
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"label-schema": {
+			"additionalProperties": {
+				"enum": ["text", "url", "semver", "hash", "rfc3339", "email"]
+			},
+			"description": "Required label keys and their expected value format",
+			"type": "object"
+		},
+		"no-color": { "type": "boolean" },
+		"no-fail": { "type": "boolean" },
+		"override": {
+			"additionalProperties": false,
+			"description": "Reassign rule codes to a different severity level",
+			"properties": {
+				"error": { "items": { "type": "string" }, "type": "array" },
+				"info": { "items": { "type": "string" }, "type": "array" },
+				"style": { "items": { "type": "string" }, "type": "array" },
+				"warning": { "items": { "type": "string" }, "type": "array" }
+			},
+			"type": "object"
+		},
+		"strict-labels": { "type": "boolean" },
+		"trustedRegistries": {
+			"description": "Registries allowed in FROM instructions without warning",
+			"oneOf": [{ "type": "string" }, { "items": { "type": "string" }, "type": "array" }]
+		}
+	},
+	"title": "hadolint configuration file",
+	"type": "object"
+}
