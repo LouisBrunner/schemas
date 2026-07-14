@@ -55,7 +55,10 @@
 		"strict-labels": { "type": "boolean" },
 		"trustedRegistries": {
 			"description": "Registries allowed in FROM instructions without warning",
-			"oneOf": [{ "type": "string" }, { "items": { "type": "string" }, "type": "array" }]
+			"oneOf": [
+				{ "type": "string" },
+				{ "items": { "type": "string" }, "type": "array" }
+			]
 		}
 	},
 	"title": "hadolint configuration file",
