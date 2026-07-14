@@ -49,6 +49,10 @@
 					"additionalProperties": { "$ref": "#/$defs/translationValue" },
 					"type": "object"
 				},
+				"entry_type": {
+					"$ref": "#/$defs/translationValue",
+					"description": "Required for config_subentries entries (e.g. 'MQTT device'), unused by 'config'/'options'."
+				},
 				"error": {
 					"additionalProperties": { "$ref": "#/$defs/translationValue" },
 					"description": "Keyed by the error code set in errors['base'] (or a field name for per-field errors).",
@@ -177,15 +181,18 @@
 		},
 		"config": {
 			"$ref": "#/$defs/dataEntryFlow",
-			"description": "The main config_flow.py ConfigFlow. flow_title is technically accepted here too but belongs at the config_subentries/root level in modern integrations."
+			"description": "The main config_flow.py ConfigFlow -- the section virtually every integration with config_flow: true in manifest.json populates. flow_title sets the card title shown for a flow started by discovery (e.g. dhcp/zeroconf/integration_discovery), typically '{name}' with a matching title_placeholders entry in context."
 		},
 		"config_panel": {
 			"$ref": "#/$defs/configPanel",
 			"description": "Strings for a custom admin panel, if this integration registers one."
 		},
 		"config_subentries": {
-			"additionalProperties": { "$ref": "#/$defs/dataEntryFlow" },
-			"description": "One entry per config_subentries subentry type (HA 2024.11+), keyed by subentry type.",
+			"additionalProperties": {
+				"allOf": [{ "$ref": "#/$defs/dataEntryFlow" }],
+				"required": ["entry_type", "initiate_flow"]
+			},
+			"description": "One entry per config_subentries subentry type (HA 2024.11+), keyed by subentry type. Unlike 'config'/'options', entry_type and initiate_flow are mandatory here (script/hassfest/translations.py gen_data_entry_schema's subentry_flow=True branch).",
 			"type": "object"
 		},
 		"conversation": {
@@ -392,6 +399,18 @@
 		"services": {
 			"additionalProperties": { "$ref": "#/$defs/conditionTriggerOrService" },
 			"description": "Custom services this integration registers, keyed by service name. Unlike conditions/triggers, a service's 'fields' entries may also carry a 'sections' grouping -- modeled loosely via 'fields' already accepting arbitrary extra structure through conditionTriggerOrService.",
+			"type": "object"
+		},
+		"system_health": {
+			"additionalProperties": false,
+			"description": "Labels for the integration's system_health.py info callback, shown on the System Health page.",
+			"properties": {
+				"info": {
+					"additionalProperties": { "$ref": "#/$defs/translationValue" },
+					"description": "Keyed by the dict key returned from the info callback.",
+					"type": "object"
+				}
+			},
 			"type": "object"
 		},
 		"title": {
