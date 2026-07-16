@@ -1,0 +1,147 @@
+{
+	"$defs": {
+		"config": {
+			"additionalProperties": true,
+			"description": "Options settable at the top level, per-package, and per-interface; values merge hierarchically. See https://vektra.github.io/mockery/latest/configuration/",
+			"properties": {
+				"all": {
+					"description": "Generate all interfaces for the specified packages",
+					"type": "boolean"
+				},
+				"build-tags": {
+					"description": "Space-separated list of additional build tags to load packages",
+					"type": "string"
+				},
+				"config": {
+					"description": "Location of the mockery config file",
+					"type": "string"
+				},
+				"dir": {
+					"description": "Directory the mock file will be written to (templated, default \"{{.InterfaceDir}}\")",
+					"type": "string"
+				},
+				"exclude-interface-regex": {
+					"description": "Interfaces matching include-interface-regex but also this are skipped (ignored if all is set)",
+					"type": "string"
+				},
+				"exclude-subpkg-regex": {
+					"description": "Regexes of subpackages to exclude when recursive is true",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"filename": {
+					"description": "Name of the file the mock will reside in (templated, default \"mocks_test.go\")",
+					"type": "string"
+				},
+				"force-file-write": {
+					"description": "Forcibly overwrite existing output files instead of failing",
+					"type": "boolean"
+				},
+				"formatter": {
+					"description": "Formatter to run on the rendered template",
+					"enum": ["gofmt", "goimports", "noop"]
+				},
+				"formatter-options": {
+					"description": "Formatter-specific configuration (currently only goimports)",
+					"type": "object"
+				},
+				"generate": {
+					"description": "Selectively enable/disable generation of specific interfaces",
+					"type": "boolean"
+				},
+				"include-auto-generated": {
+					"description": "Parse files that are themselves auto-generated (top-level or package-level only)",
+					"type": "boolean"
+				},
+				"include-interface-regex": {
+					"description": "Only interface names matching this expression are generated (ignored if all is true)",
+					"type": "string"
+				},
+				"inpackage": {
+					"description": "Override mockery's auto-detection of whether the mock is inside or outside the mocked interface's package",
+					"type": "boolean"
+				},
+				"log-level": {
+					"description": "Logger verbosity",
+					"enum": ["panic", "fatal", "error", "warn", "info", "debug", "trace"]
+				},
+				"packages": {
+					"additionalProperties": { "$ref": "#/$defs/packageConfig" },
+					"description": "Packages and interfaces to generate mocks for, keyed by Go import path",
+					"type": "object"
+				},
+				"pkgname": {
+					"description": "Go package name given to the generated mock files (templated, default \"{{.SrcPackageName}}\")",
+					"type": "string"
+				},
+				"recursive": {
+					"description": "Recursively search for all sub-packages and inject them into the config map",
+					"type": "boolean"
+				},
+				"replace-type": {
+					"description": "Type replacements to apply when generating mocks",
+					"type": "object"
+				},
+				"require-template-schema-exists": {
+					"description": "Fail if the template-data JSON schema could not be downloaded, instead of skipping validation",
+					"type": "boolean"
+				},
+				"structname": {
+					"description": "Name of the generated interface implementation (templated, default \"{{.Mock}}{{.InterfaceName}}\")",
+					"type": "string"
+				},
+				"template": {
+					"description": "Mock style template to use",
+					"type": "string"
+				},
+				"template-data": {
+					"description": "Arbitrary options passed to the template; accepted keys vary per template",
+					"type": "object"
+				},
+				"template-schema": {
+					"description": "URL of the JSON schema applied to template-data (templated, default \"{{.Template}}.schema.json\")",
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"interfaceConfig": {
+			"additionalProperties": false,
+			"description": "Per-interface entry under a package's `interfaces`",
+			"properties": {
+				"config": { "$ref": "#/$defs/config" },
+				"configs": {
+					"description": "Multiple named mock configs generated from the same interface",
+					"items": { "$ref": "#/$defs/config" },
+					"type": "array"
+				}
+			},
+			"type": "object"
+		},
+		"packageConfig": {
+			"additionalProperties": false,
+			"description": "Per-package entry under `packages`",
+			"properties": {
+				"config": { "$ref": "#/$defs/config" },
+				"interfaces": {
+					"additionalProperties": { "$ref": "#/$defs/interfaceConfig" },
+					"description": "Per-interface overrides, keyed by interface name",
+					"type": "object"
+				}
+			},
+			"type": "object"
+		}
+	},
+	"$id": "https://schemas.lbrunner.net/mockery/config.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"allOf": [{ "$ref": "#/$defs/config" }],
+	"description": "Config file for mockery, the Go mock generator (.mockery.yml / .mockery.yaml), driven via `go tool mockery` / `go:generate`. Mirrors the options documented at https://vektra.github.io/mockery/latest/configuration/; mockery has no officially published JSON Schema of its own, so this is a best-effort mirror of the docs table and may lag behind new releases.",
+	"properties": {
+		"_anchors": {
+			"description": "Unused by mockery; allowed so the file may define arbitrary YAML anchors",
+			"type": "object"
+		}
+	},
+	"title": "mockery configuration file",
+	"type": "object"
+}

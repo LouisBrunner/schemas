@@ -34,6 +34,7 @@ Point your file at it the usual way:
 - `hadolint/`: hadolint's `.hadolint.yaml`
 - `karabiner/`: Karabiner-Elements' `karabiner.json`
 - `mcp/`: the de facto `mcpServers` MCP client config shape (Claude Desktop, Claude Code, Cursor, Windsurf)
+- `mockery/`: mockery's `.mockery.yml`
 - `ollama/`: Ollama's `config.json` and `server.json`
 - `rustup/`: rustup's `settings.toml`
 - `textlint/`: textlint's `.textlintrc`
