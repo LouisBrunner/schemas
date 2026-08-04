@@ -37,9 +37,8 @@
 			"type": "string"
 		},
 		"docker": {
-			"additionalProperties": true,
-			"description": "Docker daemon configuration, merged directly into dockerd's daemon.json, see https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file. Some keys (e.g. 'hosts') may affect Colima's ability to start docker.",
-			"type": "object"
+			"$ref": "https://json.schemastore.org/dockerd.json",
+			"description": "Docker daemon configuration, merged directly into dockerd's daemon.json. Some keys (e.g. 'hosts') may affect Colima's ability to start docker."
 		},
 		"env": {
 			"additionalProperties": { "type": "string" },
@@ -133,7 +132,7 @@
 				"dns": {
 					"description": "Custom DNS resolvers for the virtual machine, e.g. ['8.8.8.8', '1.1.1.1']",
 					"items": { "type": "string" },
-					"type": "array"
+					"type": ["array", "null"]
 				},
 				"dnsHosts": {
 					"additionalProperties": { "type": "string" },
@@ -183,7 +182,7 @@
 				"required": ["mode", "script"],
 				"type": "object"
 			},
-			"type": "array"
+			"type": ["array", "null"]
 		},
 		"rootDisk": {
 			"description": "Disk size in GiB for the virtual machine's root filesystem. Ignored when runtime is 'none'.",
