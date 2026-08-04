@@ -1,0 +1,214 @@
+{
+	"$id": "https://schemas.lbrunner.net/colima/config.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": false,
+	"description": "Colima's per-profile config file (~/.colima/<profile>/colima.yaml or $COLIMA_HOME/<profile>/colima.yaml, 'default' being the default profile). Based on the `Config` struct in https://github.com/abiosoft/colima/blob/main/config/config.go and the annotated template at https://github.com/abiosoft/colima/blob/main/embedded/defaults/colima.yaml; colima has no officially published JSON Schema of its own.",
+	"properties": {
+		"arch": {
+			"description": "Architecture of the virtual machine. Cannot be changed after the VM is created.",
+			"enum": ["x86_64", "aarch64", "host"]
+		},
+		"autoActivate": {
+			"description": "Set as the active Docker/Kubernetes/Incus context on startup",
+			"type": "boolean"
+		},
+		"binfmt": {
+			"description": "Enable foreign architecture emulation via binfmt (e.g. amd64 on arm64)",
+			"type": "boolean"
+		},
+		"cpu": {
+			"description": "Number of CPUs allocated to the virtual machine",
+			"type": "integer"
+		},
+		"cpuType": {
+			"description": "CPU type for the virtual machine (requires vmType 'qemu'). Options available for host emulation can be checked with `qemu-system-$(arch) -cpu help`; instructions can be appended, e.g. 'qemu64,+ssse3'.",
+			"type": "string"
+		},
+		"disk": {
+			"description": "Disk size in GiB allocated to the virtual machine for container data. Can only be increased after the VM is created.",
+			"type": "integer"
+		},
+		"diskImage": {
+			"description": "File path to a custom disk image, overriding the image Colima would otherwise download from https://github.com/abiosoft/colima-core/releases",
+			"type": "string"
+		},
+		"diskImageMirror": {
+			"description": "Mirror URL to replace the 'https://github.com' prefix when downloading disk images, e.g. behind a proxy or an artifact mirror",
+			"type": "string"
+		},
+		"docker": {
+			"additionalProperties": true,
+			"description": "Docker daemon configuration, merged directly into dockerd's daemon.json, see https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file. Some keys (e.g. 'hosts') may affect Colima's ability to start docker.",
+			"type": "object"
+		},
+		"env": {
+			"additionalProperties": { "type": "string" },
+			"description": "Environment variables for the virtual machine",
+			"type": "object"
+		},
+		"forceDiskImage": {
+			"description": "Load 'diskImage' even if it does not match a supported release image. Bypasses validation, unsupported.",
+			"type": "boolean"
+		},
+		"forwardAgent": {
+			"description": "Forward the host's SSH agent to the virtual machine",
+			"type": "boolean"
+		},
+		"hostname": {
+			"description": "Custom hostname for the virtual machine (default: 'colima', or 'colima-<profile>' for other profiles)",
+			"type": ["string", "null"]
+		},
+		"kubernetes": {
+			"description": "Kubernetes (k3s) configuration for the virtual machine",
+			"properties": {
+				"enabled": {
+					"description": "Enable Kubernetes",
+					"type": "boolean"
+				},
+				"k3sArgs": {
+					"description": "Additional args passed to k3s, see https://docs.k3s.io/cli/server",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"port": {
+					"description": "Kubernetes API port to listen on (0 picks a random unbound port)",
+					"type": "integer"
+				},
+				"version": {
+					"description": "k3s version to use, must exactly match a release at https://github.com/k3s-io/k3s/releases",
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"memory": {
+			"description": "Memory size in GiB allocated to the virtual machine",
+			"type": "number"
+		},
+		"modelRunner": {
+			"description": "AI model runner. Both require vmType 'krunkit' for GPU access.",
+			"enum": ["docker", "ramalama"]
+		},
+		"mountInotify": {
+			"description": "Propagate inotify file events to the VM (experimental)",
+			"type": "boolean"
+		},
+		"mounts": {
+			"description": "Volume mounts for the virtual machine. When omitted, $HOME is mounted as writable by default; an explicit empty list also falls back to that default.",
+			"items": {
+				"properties": {
+					"location": {
+						"description": "Host path to mount",
+						"type": "string"
+					},
+					"mountPoint": {
+						"description": "Absolute path to mount at inside the VM, defaults to the same path as 'location'",
+						"type": "string"
+					},
+					"writable": {
+						"description": "Mount as writable",
+						"type": "boolean"
+					}
+				},
+				"required": ["location"],
+				"type": "object"
+			},
+			"type": "array"
+		},
+		"mountType": {
+			"description": "Volume mount driver for the virtual machine. 'virtiofs' is macOS + vmType 'vz'/'krunkit' only and fastest; '9p' is the most stable option for vmType 'qemu'; 'sshfs' is faster than 9p but least reliable under heavy concurrent I/O. Cannot be changed after the VM is created.",
+			"enum": ["sshfs", "9p", "virtiofs"]
+		},
+		"nestedVirtualization": {
+			"description": "Enable nested virtualization (requires an M3 Mac and vmType 'vz')",
+			"type": "boolean"
+		},
+		"network": {
+			"description": "Network configuration for the virtual machine. Most fields here are macOS only and ignored on Linux.",
+			"properties": {
+				"address": {
+					"description": "Assign a reachable IP address to the VM (macOS only). Cannot be disabled again once enabled.",
+					"type": "boolean"
+				},
+				"dns": {
+					"description": "Custom DNS resolvers for the virtual machine, e.g. ['8.8.8.8', '1.1.1.1']",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"dnsHosts": {
+					"additionalProperties": { "type": "string" },
+					"description": "DNS hostnames resolved to custom targets (IP or another host) via the internal resolver. Has no effect if custom DNS resolvers are set above; does not touch any /etc/hosts file.",
+					"type": "object"
+				},
+				"gatewayAddress": {
+					"description": "Custom gateway address for the virtual machine. The last octet must be 2.",
+					"type": "string"
+				},
+				"hostAddresses": {
+					"description": "Replicate host IP addresses in the VM, enabling port forwarding to specific host IP addresses (e.g. `docker run -p 10.0.1.2:8080:8080 ...`)",
+					"type": "boolean"
+				},
+				"interface": {
+					"description": "Host network interface to use for 'bridged' mode",
+					"type": "string"
+				},
+				"mode": {
+					"description": "Network mode for the virtual machine (macOS only)",
+					"enum": ["shared", "bridged"]
+				},
+				"preferredRoute": {
+					"description": "Use the assigned IP address as the preferred route for the VM. Only has an effect when 'address' is true.",
+					"type": "boolean"
+				}
+			},
+			"type": "object"
+		},
+		"portForwarder": {
+			"description": "Port forwarder for the virtual machine. 'ssh' is more stable but TCP only; 'grpc' supports TCP and UDP but is experimental; 'none' disables port forwarding.",
+			"enum": ["ssh", "grpc", "none"]
+		},
+		"provision": {
+			"description": "Custom provisioning scripts for the virtual machine, executed on every startup so scripts must be idempotent",
+			"items": {
+				"properties": {
+					"mode": {
+						"description": "When/as whom the script runs. 'system' runs as root and 'user' as the VM user, both passed straight to Lima. 'after-boot' runs once the VM has booted but before container runtimes start; 'ready' runs once the VM and container runtimes are fully ready, both handled by Colima itself rather than Lima.",
+						"type": "string"
+					},
+					"script": {
+						"description": "Shell script to execute",
+						"type": "string"
+					}
+				},
+				"required": ["mode", "script"],
+				"type": "object"
+			},
+			"type": "array"
+		},
+		"rootDisk": {
+			"description": "Disk size in GiB for the virtual machine's root filesystem. Ignored when runtime is 'none'.",
+			"type": "integer"
+		},
+		"rosetta": {
+			"description": "Use Rosetta for amd64 emulation (requires an M1+ Mac and vmType 'vz')",
+			"type": "boolean"
+		},
+		"runtime": {
+			"description": "Container runtime to use. Cannot be changed after the VM is created.",
+			"enum": ["docker", "containerd", "incus"]
+		},
+		"sshConfig": {
+			"description": "Automatically modify ~/.ssh/config to include a config entry for the VM. The SSH config is always generated at $COLIMA_HOME/ssh_config regardless.",
+			"type": "boolean"
+		},
+		"sshPort": {
+			"description": "Port number for the VM's SSH server (0 picks a random available port)",
+			"type": "integer"
+		},
+		"vmType": {
+			"description": "Virtual machine type (macOS 13+ only, qemu is always used otherwise). 'vz' is macOS's Virtualization.framework; 'krunkit' runs lightweight VMs on Apple Silicon with a focus on GPU access and is experimental. Cannot be changed after the VM is created.",
+			"enum": ["qemu", "vz", "krunkit"]
+		}
+	},
+	"type": "object"
+}

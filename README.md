@@ -27,6 +27,7 @@ Point your file at it the usual way:
 ## What's in here
 
 - `clippy/`: Rust Clippy's `clippy.toml`
+- `colima/`: Colima's per-profile `colima.yaml`
 - `home-assistant/`: add-on `config.yaml`, `repository.yaml`, add-on translation strings, blueprint YAML, core `configuration.yaml`, and integration `translations/<lang>.json`/`strings.json`
 - `checkov/`: Checkov's `.checkov.yaml`
 - `docker/`: the Docker CLI's `~/.docker/config.json`
@@ -43,7 +44,5 @@ Point your file at it the usual way:
 
 Most of these are reverse-engineered from official docs or, where available, the tool's own source (see the `description` in each schema for where it came from).
 None of them come from an authoritative published schema, because one doesn't exist, so treat them as best-effort rather than exhaustive.
-A few of these formats keep growing new options with every release (Clippy, Checkov), and at least one (rustup's `settings.toml`) is explicitly not meant to be a stable public interface,
-so don't be surprised if a field is missing or a schema lags behind upstream.
 
 Issues and PRs to fill gaps are welcome.
