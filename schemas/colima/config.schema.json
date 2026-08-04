@@ -38,7 +38,18 @@
 		},
 		"docker": {
 			"$ref": "https://json.schemastore.org/dockerd.json",
-			"description": "Docker daemon configuration, merged directly into dockerd's daemon.json. Some keys (e.g. 'hosts') may affect Colima's ability to start docker."
+			"description": "Docker daemon configuration, merged directly into dockerd's daemon.json. Some keys (e.g. 'hosts') may affect Colima's ability to start docker.",
+			"properties": {
+				"proxies": {
+					"description": "Proxy configuration for the daemon and default proxy env vars for containers, missing from the upstream https://json.schemastore.org/dockerd.json schema as of writing, see https://docs.docker.com/engine/daemon/proxy/ and moby's daemon/config/config.go Proxies struct",
+					"properties": {
+						"http-proxy": { "type": "string" },
+						"https-proxy": { "type": "string" },
+						"no-proxy": { "type": "string" }
+					},
+					"type": "object"
+				}
+			}
 		},
 		"env": {
 			"additionalProperties": { "type": "string" },
