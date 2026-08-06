@@ -1,0 +1,60 @@
+{
+	"$id": "https://schemas.lbrunner.net/atproto/oauth-client-metadata.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": true,
+	"description": "atproto OAuth client metadata document (served at the client_id URL). Based on RFC 7591 (OAuth 2.0 Dynamic Client Registration) as profiled by https://atproto.com/specs/oauth#clients and https://www.npmjs.com/package/@atproto/oauth-client-browser.",
+	"properties": {
+		"application_type": {
+			"enum": ["web", "native"],
+			"type": "string"
+		},
+		"client_id": {
+			"description": "Must be the URL this document is served from.",
+			"format": "uri",
+			"type": "string"
+		},
+		"client_name": { "type": "string" },
+		"client_uri": { "format": "uri", "type": "string" },
+		"dpop_bound_access_tokens": {
+			"const": true,
+			"description": "atproto requires DPoP-bound tokens.",
+			"type": "boolean"
+		},
+		"grant_types": {
+			"items": {
+				"enum": ["authorization_code", "refresh_token"],
+				"type": "string"
+			},
+			"type": "array"
+		},
+		"logo_uri": { "format": "uri", "type": "string" },
+		"policy_uri": { "format": "uri", "type": "string" },
+		"redirect_uris": {
+			"items": { "format": "uri", "type": "string" },
+			"minItems": 1,
+			"type": "array"
+		},
+		"response_types": {
+			"items": { "const": "code", "type": "string" },
+			"type": "array"
+		},
+		"scope": {
+			"description": "Space-separated scope string, must include 'atproto'.",
+			"type": "string"
+		},
+		"token_endpoint_auth_method": {
+			"description": "'none' for public/browser clients (no client secret).",
+			"enum": ["none", "private_key_jwt"],
+			"type": "string"
+		},
+		"tos_uri": { "format": "uri", "type": "string" }
+	},
+	"required": [
+		"client_id",
+		"redirect_uris",
+		"grant_types",
+		"response_types",
+		"scope"
+	],
+	"type": "object"
+}

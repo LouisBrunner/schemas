@@ -26,12 +26,14 @@ Point your file at it the usual way:
 
 ## What's in here
 
+- `atproto/`: an OAuth client's `client-metadata.json`
 - `clippy/`: Rust Clippy's `clippy.toml`
 - `colima/`: Colima's per-profile `colima.yaml`
 - `home-assistant/`: add-on `config.yaml`, `repository.yaml`, add-on translation strings, blueprint YAML, core `configuration.yaml`, and integration `translations/<lang>.json`/`strings.json`
 - `checkov/`: Checkov's `.checkov.yaml`
 - `docker/`: the Docker CLI's `~/.docker/config.json`
 - `firefox/`: Firefox enterprise `policies.json`
+- `genea/`: the `genea` v3 family-tree JSON format (source of truth for a GEDCOM export tool)
 - `hadolint/`: hadolint's `.hadolint.yaml`
 - `karabiner/`: Karabiner-Elements' `karabiner.json`
 - `mcp/`: the de facto `mcpServers` MCP client config shape (Claude Desktop, Claude Code, Cursor, Windsurf)
