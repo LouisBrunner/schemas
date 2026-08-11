@@ -1,0 +1,805 @@
+{
+	"$defs": {
+		"filterMode": {
+			"enum": [
+				"global",
+				"host",
+				"session",
+				"session-preload",
+				"directory",
+				"workspace"
+			],
+			"type": "string"
+		},
+		"keymapAction": {
+			"description": "Confirmed against https://docs.atuin.sh/latest/configuration/advanced-key-binding/. accept-N and return-selection-N (N=1-9) are matched via pattern rather than enumerated.",
+			"oneOf": [
+				{
+					"enum": [
+						"cursor-left",
+						"cursor-right",
+						"cursor-word-left",
+						"cursor-word-right",
+						"cursor-word-end",
+						"cursor-start",
+						"cursor-end",
+						"delete-char-before",
+						"delete-char-after",
+						"delete-word-before",
+						"delete-word-after",
+						"delete-to-word-boundary",
+						"clear-line",
+						"clear-to-start",
+						"clear-to-end",
+						"select-next",
+						"select-previous",
+						"scroll-half-page-up",
+						"scroll-half-page-down",
+						"scroll-page-up",
+						"scroll-page-down",
+						"scroll-to-top",
+						"scroll-to-bottom",
+						"scroll-to-screen-top",
+						"scroll-to-screen-middle",
+						"scroll-to-screen-bottom",
+						"accept",
+						"return-selection",
+						"return-original",
+						"return-query",
+						"copy",
+						"delete",
+						"delete-all",
+						"exit",
+						"redraw",
+						"cycle-filter-mode",
+						"cycle-search-mode",
+						"toggle-tab",
+						"switch-context",
+						"clear-context",
+						"vim-enter-normal",
+						"vim-enter-insert",
+						"vim-enter-insert-after",
+						"vim-enter-insert-at-start",
+						"vim-enter-insert-at-end",
+						"vim-search-insert",
+						"vim-change-to-end",
+						"enter-prefix-mode",
+						"inspect-previous",
+						"inspect-next",
+						"noop"
+					],
+					"type": "string"
+				},
+				{
+					"pattern": "^(accept|return-selection)-[1-9]$",
+					"type": "string"
+				}
+			]
+		},
+		"keymapMode": {
+			"enum": ["auto", "emacs", "vim-normal", "vim-insert"],
+			"type": "string"
+		},
+		"keymapTable": {
+			"additionalProperties": {
+				"oneOf": [
+					{ "$ref": "#/$defs/keymapAction" },
+					{
+						"items": {
+							"additionalProperties": false,
+							"properties": {
+								"action": { "$ref": "#/$defs/keymapAction" },
+								"when": {
+									"description": "Condition expression built from atoms (cursor-at-start, cursor-at-end, input-empty, original-input-empty, list-at-start, list-at-end, no-results, has-results, has-context), combinable with &&, ||, !, and parentheses.",
+									"type": "string"
+								}
+							},
+							"required": ["action"],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				]
+			},
+			"description": "Maps a key name (e.g. \"up\", \"ctrl-r\") to an action, or to an ordered list of conditional rules.",
+			"type": "object"
+		},
+		"searchMode": {
+			"enum": ["prefix", "fulltext", "fuzzy", "daemon-fuzzy", "skim"],
+			"type": "string"
+		}
+	},
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"additionalProperties": false,
+	"description": "Unofficial schema for Atuin's client config.toml — Atuin does not publish one upstream (see atuinsh/atuin#2161). Derived from https://docs.atuin.sh/latest/configuration/config/, `atuin default-config`, and crates/atuin-client/src/settings.rs (the actual Settings struct), so it covers fields the printed default-config template omits (keymap, sync_protocol, search score multipliers, logs, ai.capabilities, etc). dotfiles/scripts/kv/meta are left permissive — their exact nested shape wasn't confirmed from source.",
+	"properties": {
+		"ai": {
+			"additionalProperties": false,
+			"description": "Atuin AI assistant configuration.",
+			"properties": {
+				"api_token": {
+					"description": "Bearer token sent to a self-hosted AI server. Must exactly match that server's own AUTH_TOKEN configuration — set AUTH_TOKEN on the server process, then set this to the same value on the client.",
+					"type": "string"
+				},
+				"capabilities": {
+					"additionalProperties": false,
+					"description": "Which tools the AI assistant is allowed to use.",
+					"properties": {
+						"enable_command_execution": {
+							"description": "Allow the assistant to execute shell commands directly.",
+							"type": "boolean"
+						},
+						"enable_file_tools": {
+							"description": "Allow the assistant to read/write files.",
+							"type": "boolean"
+						},
+						"enable_history_output": {
+							"description": "Allow the assistant to view captured output of previous commands (requires pty_proxy + daemon).",
+							"type": "boolean"
+						},
+						"enable_history_search": {
+							"description": "Allow the assistant to search your Atuin history.",
+							"type": "boolean"
+						}
+					},
+					"type": "object"
+				},
+				"db_path": {
+					"description": "Where to store the AI assistant's own session database. Defaults under data_dir.",
+					"type": "string"
+				},
+				"enabled": {
+					"default": false,
+					"description": "Enable the Atuin AI assistant (bound to `?` on an empty prompt).",
+					"type": "boolean"
+				},
+				"endpoint": {
+					"description": "Base URL of a self-hosted atuin-ai-server instance (any OpenAI-compatible backend) to use instead of Atuin Hub.",
+					"type": "string"
+				},
+				"endpoint_protocol": {
+					"default": "auto",
+					"description": "Which protocol to speak to the configured AI endpoint: Atuin Hub's, the open-source atuin-ai-server's, or auto-detect.",
+					"enum": ["hub", "oss", "auto"],
+					"type": "string"
+				},
+				"model": {
+					"description": "Model alias/name to request from the configured endpoint.",
+					"type": "string"
+				},
+				"opening": {
+					"additionalProperties": false,
+					"description": "What context is automatically sent to the AI assistant when it opens.",
+					"properties": {
+						"send_cwd": {
+							"description": "Include the current working directory as context.",
+							"type": "boolean"
+						},
+						"send_last_command": {
+							"description": "Include the last-run command as context.",
+							"type": "boolean"
+						}
+					},
+					"type": "object"
+				},
+				"send_cwd": {
+					"description": "Deprecated top-level flag for including the working directory in AI requests — superseded by ai.opening.send_cwd.",
+					"type": "boolean"
+				},
+				"session_continue_minutes": {
+					"description": "How long an AI chat session can be idle before a new `?` invocation starts a fresh session instead of continuing the previous one.",
+					"minimum": 0,
+					"type": "number"
+				},
+				"yolo": {
+					"default": false,
+					"description": "Skip the AI assistant's own permission/safety checks (e.g. the double-Enter confirmation on commands it flags as dangerous).",
+					"type": "boolean"
+				}
+			},
+			"type": "object"
+		},
+		"auto_hide_height": {
+			"default": 8,
+			"description": "In compact style only: auto-hide the tabs row when fewer than this many lines are available. 0 never auto-hides.",
+			"minimum": 0,
+			"type": "integer"
+		},
+		"auto_sync": {
+			"default": true,
+			"description": "Enable or disable automatic sync.",
+			"type": "boolean"
+		},
+		"command_chaining": {
+			"default": false,
+			"description": "When triggered after &&, || or |, complete commands to chain rather than replace the current line.",
+			"type": "boolean"
+		},
+		"ctrl_n_shortcuts": {
+			"default": false,
+			"description": "Use Ctrl instead of Alt as the modifier for numerical UI shortcuts (alt-0..alt-9).",
+			"type": "boolean"
+		},
+		"cwd_filter": {
+			"description": "Unanchored regexes; commands run with a matching cwd are never written to history.",
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"daemon": {
+			"additionalProperties": false,
+			"description": "Experimental background daemon configuration.",
+			"properties": {
+				"autostart": {
+					"default": false,
+					"description": "Automatically start and manage the daemon when needed. Not compatible with systemd_socket = true.",
+					"type": "boolean"
+				},
+				"enabled": {
+					"default": false,
+					"description": "Enable using the daemon to sync.",
+					"type": "boolean"
+				},
+				"pidfile_path": {
+					"description": "Path to the daemon pidfile. Defaults to <data_dir>/atuin-daemon.pid.",
+					"type": "string"
+				},
+				"socket_path": {
+					"description": "Path to the unix socket used by the daemon (unix systems only). Defaults to <data_dir>/atuin.sock.",
+					"type": "string"
+				},
+				"sync_frequency": {
+					"default": 300,
+					"description": "How often the daemon should sync, in seconds.",
+					"minimum": 0,
+					"type": "integer"
+				},
+				"systemd_socket": {
+					"default": false,
+					"description": "Use systemd socket activation rather than opening socket_path directly (linux only).",
+					"type": "boolean"
+				},
+				"tcp_port": {
+					"default": 8889,
+					"description": "TCP port used for daemon communication on non-unix systems.",
+					"minimum": 0,
+					"type": "integer"
+				}
+			},
+			"type": "object"
+		},
+		"data_dir": {
+			"description": "Base directory for Atuin data files (databases, keys, session, etc). Defaults to the system data directory (~/.local/share/atuin on linux/mac).",
+			"type": "string"
+		},
+		"db_path": {
+			"description": "Where to store the history database. Defaults to <data_dir>/history.db.",
+			"type": "string"
+		},
+		"dialect": {
+			"default": "us",
+			"description": "Date format used when displaying history.",
+			"enum": ["us", "uk"],
+			"type": "string"
+		},
+		"dotfiles": {
+			"additionalProperties": true,
+			"description": "Dotfiles-sync (aliases/env vars) configuration. Exact nested shape not confirmed from source; treat as best-effort/permissive.",
+			"type": "object"
+		},
+		"enter_accept": {
+			"default": true,
+			"description": "If true, Enter immediately executes the selected command and Tab places it in the prompt for editing. If false, both Enter and Tab just populate the prompt.",
+			"type": "boolean"
+		},
+		"exit_mode": {
+			"default": "return-original",
+			"description": "What to do with the command line when Escape is pressed while searching.",
+			"enum": ["return-original", "return-query"],
+			"type": "string"
+		},
+		"extra_headers": {
+			"additionalProperties": { "type": "string" },
+			"description": "Extra HTTP headers sent on every request to the sync server, e.g. for a proxy requiring its own auth header. Headers Atuin sets itself (e.g. Authorization) cannot be overridden, and cross-origin redirects are refused once set.",
+			"type": "object"
+		},
+		"filter_mode": {
+			"$ref": "#/$defs/filterMode",
+			"default": "global",
+			"description": "Filter mode used for interactive search. \"global\" is the least restrictive: it shows history from every host/session/directory, not a special keyword beyond being the broadest enum value."
+		},
+		"filter_mode_shell_up_key_binding": {
+			"$ref": "#/$defs/filterMode",
+			"description": "Filter mode used when Atuin is invoked from the shell's up-key binding. Defaults to filter_mode when unset."
+		},
+		"history_filter": {
+			"description": "Unanchored regexes; commands matching any of these are never written to history.",
+			"items": { "type": "string" },
+			"type": "array"
+		},
+		"history_format": {
+			"default": "{time}\t{command}\t{duration}",
+			"description": "Default history list format, can also be set with the --format CLI arg.",
+			"type": "string"
+		},
+		"inline_height": {
+			"default": 40,
+			"description": "Maximum number of lines the inline interface should take up. 0 means always fullscreen.",
+			"minimum": 0,
+			"type": "integer"
+		},
+		"inline_height_shell_up_key_binding": {
+			"default": 0,
+			"description": "Same as inline_height, but when invoked from the shell's up-key binding.",
+			"minimum": 0,
+			"type": "integer"
+		},
+		"invert": {
+			"default": false,
+			"description": "Put the search bar at the top of the UI instead of the bottom.",
+			"type": "boolean"
+		},
+		"key_path": {
+			"description": "Where to store the E2E-encryption key used for sync. Defaults to <data_dir>/key.",
+			"type": "string"
+		},
+		"keymap": {
+			"additionalProperties": { "$ref": "#/$defs/keymapTable" },
+			"description": "Custom keybindings for the TUI, added in v18.12.0. One table per keymap mode (section names not fully confirmed from source — seen written as [keymap.emacs]/[keymap.vim-normal]/[keymap.vim-insert]/[keymap.inspector]/[keymap.prefix] in one source, so left permissive here rather than a fixed enum). Each entry maps a key name to either a single action string, or an ordered list of {when, action} conditional rules (first match wins; unbound keys pass through). See https://docs.atuin.sh/latest/configuration/advanced-key-binding/ for the authoritative action/condition names.",
+			"type": "object"
+		},
+		"keymap_cursor": {
+			"additionalProperties": false,
+			"description": "Cursor style per keymap mode. Values are \"default\" or \"{blink,steady}-{block,underline,bar}\".",
+			"properties": {
+				"emacs": { "type": "string" },
+				"vim_insert": { "type": "string" },
+				"vim_normal": { "type": "string" }
+			},
+			"type": "object"
+		},
+		"keymap_mode": {
+			"$ref": "#/$defs/keymapMode",
+			"default": "emacs",
+			"description": "Startup keymap for `atuin search`. \"auto\" picks based on the shell's keymap where the keybinding is defined."
+		},
+		"keymap_mode_shell": {
+			"$ref": "#/$defs/keymapMode",
+			"description": "Same as keymap_mode, but specifically for shell-initiated (up-arrow) invocations."
+		},
+		"keys": {
+			"additionalProperties": false,
+			"description": "Keybinding edge-case behavior in the interactive search UI.",
+			"properties": {
+				"accept_past_line_end": {
+					"default": true,
+					"description": "Right arrow behaves like Tab: copies the selected line to the command line for editing.",
+					"type": "boolean"
+				},
+				"accept_past_line_start": {
+					"default": false,
+					"description": "Left arrow behaves like Tab: copies the selected line to the command line for editing.",
+					"type": "boolean"
+				},
+				"accept_with_backspace": {
+					"default": false,
+					"description": "Backspace at the start of the line behaves like Tab: copies the selected line to the command line for editing.",
+					"type": "boolean"
+				},
+				"exit_past_line_start": {
+					"default": true,
+					"description": "Left arrow exits the TUI when scrolling before the first character.",
+					"type": "boolean"
+				},
+				"prefix": {
+					"description": "The key that activates \"prefix\" keymap mode (a leader-key style modal layer), used together with the [keymap.prefix] table.",
+					"type": "string"
+				},
+				"scroll_exits": {
+					"default": true,
+					"description": "Up/down exits the TUI when scrolled past the first/last entry.",
+					"type": "boolean"
+				}
+			},
+			"type": "object"
+		},
+		"kv": {
+			"additionalProperties": true,
+			"description": "Key-value store configuration. Exact nested shape not confirmed from source; treat as best-effort/permissive.",
+			"type": "object"
+		},
+		"local_timeout": {
+			"default": 5,
+			"description": "Timeout, in seconds, for acquiring a local sqlite database connection.",
+			"minimum": 0,
+			"type": "number"
+		},
+		"logs": {
+			"additionalProperties": false,
+			"description": "Logging configuration.",
+			"properties": {
+				"ai": {
+					"additionalProperties": true,
+					"description": "Per-component log override for the AI assistant. Exact shape not confirmed from source; treat as best-effort.",
+					"type": "object"
+				},
+				"daemon": {
+					"additionalProperties": true,
+					"description": "Per-component log override for the daemon. Exact shape not confirmed from source; treat as best-effort.",
+					"type": "object"
+				},
+				"dir": {
+					"description": "Directory log files are written to.",
+					"type": "string"
+				},
+				"enabled": {
+					"description": "Global logging enable/disable.",
+					"type": "boolean"
+				},
+				"level": {
+					"description": "Default log level (e.g. \"info\", \"debug\", \"trace\", \"warn\", \"error\").",
+					"type": "string"
+				},
+				"retention": {
+					"description": "Log retention period, in days.",
+					"minimum": 0,
+					"type": "integer"
+				},
+				"search": {
+					"additionalProperties": true,
+					"description": "Per-component log override for interactive search. Exact shape not confirmed from source; treat as best-effort.",
+					"type": "object"
+				}
+			},
+			"type": "object"
+		},
+		"max_preview_height": {
+			"default": 4,
+			"description": "Maximum height of the command preview pane.",
+			"minimum": 0,
+			"type": "integer"
+		},
+		"meta": {
+			"additionalProperties": true,
+			"description": "Metadata store configuration. Exact nested shape not confirmed from source; treat as best-effort/permissive.",
+			"type": "object"
+		},
+		"network_connect_timeout": {
+			"default": 5,
+			"description": "Network connect timeout, in seconds.",
+			"minimum": 0,
+			"type": "integer"
+		},
+		"network_timeout": {
+			"default": 30,
+			"description": "Network request timeout, in seconds.",
+			"minimum": 0,
+			"type": "integer"
+		},
+		"no_mouse": {
+			"default": false,
+			"description": "Disable mouse input handling in the interactive UI.",
+			"type": "boolean"
+		},
+		"prefers_reduced_motion": {
+			"default": false,
+			"description": "Minimize UI motion (e.g. timers won't update live). Can also be set via the NO_MOTION env var.",
+			"type": "boolean"
+		},
+		"preview": {
+			"additionalProperties": false,
+			"description": "Command preview pane configuration.",
+			"properties": {
+				"strategy": {
+					"default": "auto",
+					"description": "How to calculate the preview height (respects max_preview_height). auto: length of the selected command. static: length of the longest command in history. fixed: always use max_preview_height.",
+					"enum": ["auto", "static", "fixed"],
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"pty_proxy": {
+			"additionalProperties": false,
+			"description": "PTY proxy configuration. Normally Atuin only sees what you typed (via shell hooks). Enabling this re-execs your shell inside `atuin pty-proxy`, a pseudo-terminal wrapper that also captures everything printed to the screen (command output), enabling features like reviewing/searching past command output, not just command text.",
+			"properties": {
+				"enabled": {
+					"default": false,
+					"description": "If enabled, `atuin init` first re-execs your shell inside `atuin pty-proxy`, so a separate `eval \"$(atuin pty-proxy init)\"` line isn't needed. Supported for bash, zsh, fish and nu on unix.",
+					"type": "boolean"
+				}
+			},
+			"type": "object"
+		},
+		"record_store_path": {
+			"description": "Where to store the generic record store database (backs sync records, dotfiles, scripts, kv, etc), separate from the history DB. Defaults to <data_dir>/records.db.",
+			"type": "string"
+		},
+		"scripts": {
+			"additionalProperties": true,
+			"description": "Saved-scripts database configuration. Exact nested shape not confirmed from source; treat as best-effort/permissive.",
+			"type": "object"
+		},
+		"scroll_context_lines": {
+			"default": 1,
+			"description": "Number of context lines shown when scrolling by pages.",
+			"minimum": 0,
+			"type": "integer"
+		},
+		"search": {
+			"additionalProperties": false,
+			"description": "Interactive search filter and ranking configuration.",
+			"properties": {
+				"filters": {
+					"default": [
+						"global",
+						"host",
+						"session",
+						"workspace",
+						"directory",
+						"session-preload"
+					],
+					"description": "Enabled filter modes, in priority order. \"workspace\" is skipped when not in a workspace or workspaces = false.",
+					"items": { "$ref": "#/$defs/filterMode" },
+					"type": "array"
+				},
+				"frecency_score_multiplier": {
+					"description": "Weight given to the combined recency+frequency (\"frecency\") score, when smart_sort ranks results.",
+					"type": "number"
+				},
+				"frequency_score_multiplier": {
+					"description": "Weight given to how often a command has been run, when smart_sort ranks results.",
+					"type": "number"
+				},
+				"recency_score_multiplier": {
+					"description": "Weight given to how recently a command was run, when smart_sort ranks results.",
+					"type": "number"
+				},
+				"shells": {
+					"default": "auto",
+					"description": "Filter results by the shell that ran the command. \"all\": show everything. \"auto\": only the current shell type (plus entries with no recorded shell). Array: an explicit allow-list of shell names (include \"\" to allow entries with no recorded shell).",
+					"oneOf": [
+						{ "enum": ["all", "auto"], "type": "string" },
+						{ "items": { "type": "string" }, "type": "array" }
+					]
+				}
+			},
+			"type": "object"
+		},
+		"search_mode": {
+			"$ref": "#/$defs/searchMode",
+			"default": "fuzzy",
+			"description": "Search mode used for interactive search."
+		},
+		"search_mode_shell_up_key_binding": {
+			"$ref": "#/$defs/searchMode",
+			"description": "Search mode used when Atuin is invoked from the shell's up-key binding. Defaults to the value of search_mode when unset."
+		},
+		"secrets_filter": {
+			"default": true,
+			"description": "Match history against a default regex set (AWS key IDs, GitHub PATs, Slack OAuth/webhook tokens, Stripe keys) and skip saving matches.",
+			"type": "boolean"
+		},
+		"session_path": {
+			"description": "Where to store the cached sync-server auth session token. Defaults to <data_dir>/session.",
+			"type": "string"
+		},
+		"shell_up_key_binding": {
+			"default": true,
+			"description": "Whether Atuin takes over the shell's up-arrow binding at all.",
+			"type": "boolean"
+		},
+		"show_help": {
+			"default": true,
+			"description": "Show the help row (Atuin version, update availability, keymap hint, total command count).",
+			"type": "boolean"
+		},
+		"show_numeric_shortcuts": {
+			"default": true,
+			"description": "Show numeric shortcuts (1..9) beside list items in the TUI.",
+			"type": "boolean"
+		},
+		"show_preview": {
+			"default": true,
+			"description": "Show a preview pane with the full text of the currently-selected history entry — useful when the command is longer than the terminal width, or is a multi-line script, and would otherwise be cut off.",
+			"type": "boolean"
+		},
+		"show_tabs": {
+			"default": true,
+			"description": "Show tabs for Search and Inspect.",
+			"type": "boolean"
+		},
+		"smart_sort": {
+			"description": "Enable smarter result ranking beyond plain recency/frequency (see search.*_score_multiplier for tuning the weights it uses).",
+			"type": "boolean"
+		},
+		"stats": {
+			"additionalProperties": false,
+			"description": "Configuration for `atuin stats`, which reports things like your most-used commands and estimated time saved. These settings control counting granularity, not history recording.",
+			"properties": {
+				"common_prefix": {
+					"description": "Commands stripped/ignored as a prefix before counting stats, e.g. \"sudo\" so `sudo apt` counts as `apt`.",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"common_subcommands": {
+					"description": "Commands whose subcommand should be counted separately in stats, e.g. with \"git\" listed here, `git commit` and `git log` are tracked as distinct entries instead of both collapsing into one \"git\" count.",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"ignored_commands": {
+					"description": "Commands completely excluded from stats, e.g. \"cd\", \"ls\", \"vi\".",
+					"items": { "type": "string" },
+					"type": "array"
+				}
+			},
+			"type": "object"
+		},
+		"store_failed": {
+			"default": true,
+			"description": "Store commands that failed (non-zero exit status).",
+			"type": "boolean"
+		},
+		"strip_trailing_whitespace": {
+			"default": true,
+			"description": "Strip trailing spaces/tabs from commands before saving to history. Escaped trailing whitespace is preserved.",
+			"type": "boolean"
+		},
+		"style": {
+			"default": "compact",
+			"description": "Display style to use for the interactive UI.",
+			"enum": ["auto", "full", "compact"],
+			"type": "string"
+		},
+		"sync_address": {
+			"default": "https://api.atuin.sh",
+			"description": "Address of the sync server.",
+			"type": "string"
+		},
+		"sync_frequency": {
+			"default": "5m",
+			"description": "How often to sync history. Only triggered when a command runs, so intervals may be longer in practice. \"0\" syncs after every command.",
+			"type": "string"
+		},
+		"sync_protocol": {
+			"default": "auto",
+			"description": "Which sync/auth protocol to speak to the sync server: Atuin Hub's, the legacy self-hosted protocol, or auto-detect.",
+			"enum": ["hub", "legacy", "auto"],
+			"type": "string"
+		},
+		"theme": {
+			"additionalProperties": false,
+			"description": "Color theme configuration.",
+			"properties": {
+				"debug": {
+					"description": "Whether the theme manager outputs extra debug information to help fix themes.",
+					"type": "boolean"
+				},
+				"max_depth": {
+					"description": "Maximum theme-inheritance resolution depth, when a theme extends another theme.",
+					"minimum": 0,
+					"type": "integer"
+				},
+				"name": {
+					"default": "default",
+					"description": "Theme name: built-in \"default\"/\"autumn\"/\"marine\", or the filename stem of a custom TOML theme under the config dir's themes/ subdirectory (or ATUIN_THEME_DIR).",
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"timezone": {
+			"default": "local",
+			"description": "Timezone for displaying timestamps: \"l\"/\"local\" for system local time, or a UTC offset like \"+9\", \"-05\", \"+03:30\".",
+			"type": "string"
+		},
+		"tmux": {
+			"additionalProperties": false,
+			"description": "tmux popup integration (requires tmux >= 3.2; zsh/bash/fish only, and not compatible with iTerm2's native tmux integration).",
+			"properties": {
+				"enabled": {
+					"default": false,
+					"description": "Use a tmux popup window for interactive search when running inside tmux. Can also be controlled via the ATUIN_TMUX_POPUP env var.",
+					"type": "boolean"
+				},
+				"height": {
+					"default": "60%",
+					"description": "Height of the tmux popup window: a percentage string or an integer line count.",
+					"type": "string"
+				},
+				"width": {
+					"default": "80%",
+					"description": "Width of the tmux popup window: a percentage string or an integer character count.",
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"ui": {
+			"additionalProperties": false,
+			"description": "Interactive search result columns.",
+			"properties": {
+				"columns": {
+					"default": ["duration", "time", "command"],
+					"description": "Columns shown left-to-right in interactive search (the selection indicator is always shown first, implicitly).",
+					"items": {
+						"oneOf": [
+							{
+								"enum": [
+									"duration",
+									"time",
+									"datetime",
+									"directory",
+									"host",
+									"user",
+									"exit",
+									"command"
+								],
+								"type": "string"
+							},
+							{
+								"additionalProperties": false,
+								"properties": {
+									"expand": {
+										"description": "Makes the column fill remaining space. Defaults to true for \"command\", false otherwise. Only one column should have expand = true.",
+										"type": "boolean"
+									},
+									"type": {
+										"enum": [
+											"duration",
+											"time",
+											"datetime",
+											"directory",
+											"host",
+											"user",
+											"exit",
+											"command"
+										],
+										"type": "string"
+									},
+									"width": { "minimum": 0, "type": "integer" }
+								},
+								"required": ["type"],
+								"type": "object"
+							}
+						]
+					},
+					"type": "array"
+				},
+				"syntax_highlight": {
+					"default": true,
+					"description": "Syntax-highlight commands in search results using the active theme's colors. Not available on all platforms (e.g. Windows).",
+					"type": "boolean"
+				}
+			},
+			"type": "object"
+		},
+		"update_channel": {
+			"default": "stable",
+			"description": "Release channel followed by `atuin update` and update checks.",
+			"enum": ["stable", "nightly"],
+			"type": "string"
+		},
+		"update_check": {
+			"default": true,
+			"description": "Enable or disable automatic update checks.",
+			"type": "boolean"
+		},
+		"word_chars": {
+			"description": "Characters that count as part of a word for word-jump purposes.",
+			"type": "string"
+		},
+		"word_jump_mode": {
+			"default": "emacs",
+			"description": "Word-boundary jump semantics used for word-wise cursor movement.",
+			"enum": ["emacs", "subl"],
+			"type": "string"
+		},
+		"workspaces": {
+			"default": false,
+			"description": "When enabled, use workspace filtering by default (filters for commands executed anywhere within the current git repository tree) when available.",
+			"type": "boolean"
+		}
+	},
+	"title": "Atuin config.toml",
+	"type": "object"
+}

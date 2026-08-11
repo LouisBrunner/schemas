@@ -26,7 +26,9 @@ Point your file at it the usual way:
 
 ## What's in here
 
+- `acp/`: the de facto `agentServers` ACP (Agent Client Protocol) client config shape (modeled on Zed's `agent_servers` settings)
 - `atproto/`: an OAuth client's `client-metadata.json`
+- `atuin/`: Atuin's client `config.toml`
 - `clippy/`: Rust Clippy's `clippy.toml`
 - `colima/`: Colima's per-profile `colima.yaml`
 - `home-assistant/`: add-on `config.yaml`, `repository.yaml`, add-on translation strings, blueprint YAML, core `configuration.yaml`, and integration `translations/<lang>.json`/`strings.json`
