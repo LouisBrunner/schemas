@@ -26,7 +26,6 @@ Point your file at it the usual way:
 
 ## What's in here
 
-- `acp/`: the de facto `agentServers` ACP (Agent Client Protocol) client config shape (modeled on Zed's `agent_servers` settings)
 - `atproto/`: an OAuth client's `client-metadata.json`
 - `atuin/`: Atuin's client `config.toml`
 - `clippy/`: Rust Clippy's `clippy.toml`
@@ -35,10 +34,8 @@ Point your file at it the usual way:
 - `checkov/`: Checkov's `.checkov.yaml`
 - `docker/`: the Docker CLI's `~/.docker/config.json`
 - `firefox/`: Firefox enterprise `policies.json`
-- `genea/`: the `genea` v3 family-tree JSON format (source of truth for a GEDCOM export tool)
 - `hadolint/`: hadolint's `.hadolint.yaml`
 - `karabiner/`: Karabiner-Elements' `karabiner.json`
-- `mcp/`: the de facto `mcpServers` MCP client config shape (Claude Desktop, Claude Code, Cursor, Windsurf)
 - `mockery/`: mockery's `.mockery.yml`
 - `ollama/`: Ollama's `config.json` and `server.json`
 - `rustup/`: rustup's `settings.toml`
