@@ -104,6 +104,30 @@
 			"description": "Maps a key name (e.g. \"up\", \"ctrl-r\") to an action, or to an ordered list of conditional rules.",
 			"type": "object"
 		},
+		"logComponent": {
+			"additionalProperties": false,
+			"description": "Per-component log settings. Source: LogConfig in crates/atuin-client/src/settings.rs.",
+			"properties": {
+				"enabled": {
+					"description": "Override the global `logs.enabled` for this log.",
+					"type": "boolean"
+				},
+				"file": {
+					"description": "Log file name (relative to `logs.dir`) or an absolute path.",
+					"type": "string"
+				},
+				"level": {
+					"description": "Override the global `logs.level` for this log.",
+					"type": "string"
+				},
+				"retention": {
+					"description": "Override the global `logs.retention` for this log: a duration like \"7d\", or a bare number of days.",
+					"minimum": 0,
+					"type": ["string", "integer"]
+				}
+			},
+			"type": "object"
+		},
 		"searchMode": {
 			"enum": ["prefix", "fulltext", "fuzzy", "daemon-fuzzy", "skim"],
 			"type": "string"
@@ -418,14 +442,12 @@
 			"description": "Logging configuration.",
 			"properties": {
 				"ai": {
-					"additionalProperties": true,
-					"description": "Per-component log override for the AI assistant. Exact shape not confirmed from source; treat as best-effort.",
-					"type": "object"
+					"$ref": "#/$defs/logComponent",
+					"description": "Log overrides for the AI assistant."
 				},
 				"daemon": {
-					"additionalProperties": true,
-					"description": "Per-component log override for the daemon. Exact shape not confirmed from source; treat as best-effort.",
-					"type": "object"
+					"$ref": "#/$defs/logComponent",
+					"description": "Log overrides for the daemon."
 				},
 				"dir": {
 					"description": "Directory log files are written to.",
@@ -440,14 +462,14 @@
 					"type": "string"
 				},
 				"retention": {
-					"description": "Log retention period, in days.",
+					"default": "4d",
+					"description": "How long to keep log files: a duration like \"12h\" or \"7d\", or a bare number of days. 0 keeps nothing.",
 					"minimum": 0,
-					"type": "integer"
+					"type": ["string", "integer"]
 				},
 				"search": {
-					"additionalProperties": true,
-					"description": "Per-component log override for interactive search. Exact shape not confirmed from source; treat as best-effort.",
-					"type": "object"
+					"$ref": "#/$defs/logComponent",
+					"description": "Log overrides for interactive search (only used with `--interactive`)."
 				}
 			},
 			"type": "object"
@@ -479,6 +501,35 @@
 			"default": false,
 			"description": "Disable mouse input handling in the interactive UI.",
 			"type": "boolean"
+		},
+		"output": {
+			"additionalProperties": false,
+			"description": "Command output capture (Atuin 18.22+). Needs `[daemon]` and `[pty_proxy]` enabled; `atuin config enable output-capture` sets all three up. Source: crates/atuin-client/src/settings/output.rs, https://docs.atuin.sh/latest/guide/output-capture/.",
+			"properties": {
+				"enabled": {
+					"default": false,
+					"description": "Capture and store the output of the commands you run. When false, the other keys are ignored. Enabling takes a daemon restart and a new shell.",
+					"type": "boolean"
+				},
+				"max_disk_usage": {
+					"default": "10%",
+					"description": "The most disk space captured output may use: \"unlimited\", a percentage of the disk holding the data directory (\"10%\"), a size (\"10GB\"), or a number of bytes. Past the limit the daemon deletes the oldest output first. Restart the daemon after changing it.",
+					"minimum": 0,
+					"type": ["string", "integer"]
+				},
+				"max_output_size": {
+					"default": "1MB",
+					"description": "The most output kept for one command; past it Atuin keeps the start and end and drops the middle. A size like \"512KB\" or \"2MB\", or a number of bytes. Read when the shell starts.",
+					"minimum": 0,
+					"type": ["string", "integer"]
+				},
+				"sync": {
+					"default": false,
+					"description": "Reserved for syncing captured output between machines. Not implemented: captured output never leaves the machine, whatever this is set to.",
+					"type": "boolean"
+				}
+			},
+			"type": "object"
 		},
 		"prefers_reduced_motion": {
 			"default": false,
