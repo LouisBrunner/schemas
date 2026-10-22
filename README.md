@@ -38,8 +38,10 @@ Point your file at it the usual way:
 - `karabiner/`: Karabiner-Elements' `karabiner.json`
 - `mockery/`: mockery's `.mockery.yml`
 - `ollama/`: Ollama's `config.json` and `server.json`
+- `restish/`: Restish's `restish.json` config
 - `rustup/`: rustup's `settings.toml`
 - `textlint/`: textlint's `.textlintrc`
+- `typst/`: Typst's `typst.toml` package manifest, including the tytanic `[tool.tytanic]` section
 
 ## Caveats
 

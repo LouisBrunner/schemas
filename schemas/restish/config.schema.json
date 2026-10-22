@@ -1,0 +1,242 @@
+{
+	"$defs": {
+		"AuthConfig": {
+			"additionalProperties": false,
+			"description": "Authentication configuration. Secret params may be written as `env:NAME` or `command:...`.",
+			"properties": {
+				"params": {
+					"additionalProperties": { "type": "string" },
+					"description": "Handler-specific settings, such as username, token, client_id, scopes",
+					"type": "object"
+				},
+				"type": {
+					"description": "Auth mechanism",
+					"examples": [
+						"http-basic",
+						"bearer",
+						"oauth-client-credentials",
+						"oauth-authorization-code",
+						"external-tool"
+					],
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"CredentialConfig": {
+			"description": "Satisfies an operation credential requirement. Use either inline `auth` or `auth_ref`, not both.",
+			"not": { "required": ["auth", "auth_ref"] },
+			"properties": {
+				"auth": { "$ref": "#/$defs/AuthConfig" },
+				"auth_ref": {
+					"description": "Name of a top-level auth_profiles entry",
+					"type": "string"
+				},
+				"satisfies": {
+					"description": "Scopes or roles this credential covers",
+					"items": { "type": "string" },
+					"type": "array"
+				}
+			},
+			"type": "object"
+		},
+		"PaginationConfig": {
+			"additionalProperties": false,
+			"properties": {
+				"items_path": {
+					"description": "Filter expression that extracts the items array (for example `data`). If empty, the body is used when it is an array",
+					"type": "string"
+				},
+				"next_path": {
+					"description": "Filter expression that extracts the next-page URL from the body. Alternative to a Link header with rel=\"next\"",
+					"type": "string"
+				},
+				"page_param": {
+					"description": "Query parameter that increments between pages when there are no next links or next_path",
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"ProfileConfig": {
+			"description": "Request defaults for an API. File-based mTLS (client_cert with client_key) cannot be combined with tls_signer.",
+			"not": {
+				"anyOf": [
+					{ "required": ["auth", "auth_ref"] },
+					{ "required": ["tls_signer", "client_cert"] },
+					{ "required": ["tls_signer", "client_key"] }
+				]
+			},
+			"properties": {
+				"auth": { "$ref": "#/$defs/AuthConfig" },
+				"auth_ref": {
+					"description": "Name of a top-level auth_profiles entry to use",
+					"type": "string"
+				},
+				"base_url": {
+					"description": "Overrides the API-level base URL while this profile is active",
+					"type": "string"
+				},
+				"ca_cert": {
+					"description": "Path to a PEM CA bundle for this profile",
+					"type": "string"
+				},
+				"client_cert": {
+					"description": "Path to a PEM client certificate",
+					"type": "string"
+				},
+				"client_key": {
+					"description": "Path to a PEM client private key",
+					"type": "string"
+				},
+				"credentials": {
+					"additionalProperties": { "$ref": "#/$defs/CredentialConfig" },
+					"description": "Maps operation credential requirement IDs to auth configurations that satisfy them",
+					"type": "object"
+				},
+				"headers": {
+					"description": "Persistent headers sent with every request, as `Name: Value`",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"operation_base": {
+					"description": "Overrides the API-level operation base while this profile is active",
+					"type": "string"
+				},
+				"query": {
+					"description": "Persistent query parameters sent with every request, as `key=value`",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"server_variables": {
+					"additionalProperties": { "type": "string" },
+					"description": "Overrides API-level OpenAPI server URL variables when generating operation paths",
+					"type": "object"
+				},
+				"tls_signer": {
+					"description": "Selects a tls-signer plugin for mTLS client certificate signing",
+					"type": "string"
+				},
+				"tls_signer_params": {
+					"additionalProperties": { "type": "string" },
+					"description": "Plugin-specific configuration passed to the tls-signer",
+					"type": "object"
+				},
+				"url_overrides": {
+					"additionalProperties": { "type": "string" },
+					"description": "Overrides or extends API-level URL prefix rewrites",
+					"type": "object"
+				}
+			},
+			"type": "object"
+		}
+	},
+	"$id": "https://schemas.lbrunner.net/restish/config.schema.json",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"description": "Restish config (~/.config/restish/restish.json, %APPDATA%\\restish\\restish.json on Windows; also a trusted project .restish.json, which layers apis and theme). Best-effort schema from https://rest.sh/docs/reference/config/ and https://rest.sh/docs/reference/profiles/: Restish does not publish a formal schema. Unix config files must not be group- or world-readable (chmod 600).",
+	"properties": {
+		"$schema": { "type": "string" },
+		"apis": {
+			"additionalProperties": {
+				"additionalProperties": false,
+				"properties": {
+					"allow_cross_origin_spec": {
+						"description": "Allows discovery from spec URLs in Link headers on hosts other than base_url. Private, loopback, link-local and unspecified IP literals are still rejected",
+						"type": "boolean"
+					},
+					"allowed_operation_origins": {
+						"description": "Lets generated commands use operation- or path-level OpenAPI servers on origins outside base_url",
+						"items": { "type": "string" },
+						"type": "array"
+					},
+					"base_url": {
+						"description": "Base URL for all requests to this API",
+						"type": "string"
+					},
+					"command_layout": {
+						"description": "`tags` groups operations under first-tag subcommands; empty is treated as `flat`",
+						"enum": ["", "flat", "tags"],
+						"type": "string"
+					},
+					"operation_base": {
+						"description": "Absolute path resolved against base_url for OpenAPI operation paths",
+						"type": "string"
+					},
+					"pagination": { "$ref": "#/$defs/PaginationConfig" },
+					"preserve_header_case": {
+						"description": "Sends header names with their configured casing, for HTTP/1.x servers that treat names as case-sensitive. No effect on HTTP/2",
+						"type": "boolean"
+					},
+					"profiles": {
+						"additionalProperties": { "$ref": "#/$defs/ProfileConfig" },
+						"description": "Profile name to profile configuration",
+						"type": "object"
+					},
+					"retry_max_wait": {
+						"description": "Caps Retry-After and X-Retry-In delays when no command-line or environment override is given",
+						"examples": ["30s"],
+						"type": "string"
+					},
+					"server_variables": {
+						"additionalProperties": { "type": "string" },
+						"description": "Explicit values for OpenAPI server URL variables",
+						"type": "object"
+					},
+					"spec_files": {
+						"description": "Ordered local paths or URLs, deep-merged in order with later entries winning. When set, network spec discovery is skipped and spec_url is ignored",
+						"items": { "type": "string" },
+						"type": "array"
+					},
+					"spec_url": {
+						"description": "OpenAPI spec URL. spec_files wins if both are set",
+						"type": "string"
+					},
+					"url_overrides": {
+						"additionalProperties": { "type": "string" },
+						"description": "Rewrites resolved request URL prefixes before execution (for example to route to staging)",
+						"type": "object"
+					}
+				},
+				"type": "object"
+			},
+			"description": "Short API name to per-API configuration. Names may contain Unicode letters and numbers, combining marks, `-` and `_`, must start with a letter or number, and cannot be a built-in command (api, get, post, completion)",
+			"propertyNames": { "pattern": "^[\\p{L}\\p{N}][\\p{L}\\p{N}\\p{M}_-]*$" },
+			"type": "object"
+		},
+		"auth_profiles": {
+			"additionalProperties": { "$ref": "#/$defs/AuthConfig" },
+			"description": "Named auth configurations that profiles reference via auth_ref",
+			"type": "object"
+		},
+		"cache": {
+			"additionalProperties": false,
+			"description": "Global HTTP response cache settings (does not cover auth tokens)",
+			"properties": {
+				"max_size": {
+					"default": "100MB",
+					"description": "Maximum HTTP response cache size",
+					"examples": ["250MB"],
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"plugins": {
+			"additionalProperties": true,
+			"description": "Per-plugin config keyed by plugin name without the `restish-` prefix. Stored as raw JSON and read by plugins via the config-read message",
+			"type": "object"
+		},
+		"theme": {
+			"additionalProperties": { "type": "string" },
+			"description": "Syntax-highlighting overrides. Keys are Chroma token names or Restish aliases (text, header_key, heading, diagnostic_warn, diagnostic_error, diagnostic_hint, status_2xx); values are Chroma style descriptors",
+			"examples": [{ "text": "#afd787", "heading": "bold #ff5f87" }],
+			"type": "object"
+		},
+		"theme_source": {
+			"description": "Source last used by `config theme set`. Local paths are absolute; official themes are `official:<name>`",
+			"type": "string"
+		}
+	},
+	"title": "Restish restish.json",
+	"type": "object"
+}
