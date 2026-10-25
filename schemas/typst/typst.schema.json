@@ -21,13 +21,26 @@
 							"additionalProperties": false,
 							"properties": {
 								"dir": { "default": "ltr", "enum": ["ltr", "rtl"] },
-								"max-delta": { "default": 1, "maximum": 255, "minimum": 0, "type": "integer" },
-								"max-deviations": { "default": 0, "minimum": 0, "type": "integer" },
+								"max-delta": {
+									"default": 1,
+									"maximum": 255,
+									"minimum": 0,
+									"type": "integer"
+								},
+								"max-deviations": {
+									"default": 0,
+									"minimum": 0,
+									"type": "integer"
+								},
 								"ppi": { "default": 144.0, "type": "number" }
 							},
 							"type": "object"
 						},
-						"tests": { "default": "tests", "description": "Test directory, relative to this file", "type": "string" }
+						"tests": {
+							"default": "tests",
+							"description": "Test directory, relative to this file",
+							"type": "string"
+						}
 					},
 					"type": "object"
 				}
